@@ -1,5 +1,5 @@
 import { SwipeItem, SwipeButtonsContainer } from 'react-native-swipe-item';
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     Text,
     View,
@@ -10,10 +10,16 @@ import {
 } from "react-native";
 import { Colors, Fonts, Sizes, CommonStyles } from "../../../constant/styles";
 import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
+import { useLocalSearchParams, useNavigation } from "expo-router";
 import CollapsingToolbar from "../../../component/sliverAppBar";
+import Search from "../../../component/Search";
 import { Snackbar } from 'react-native-paper';
+import { useDatabase } from '../../../store/SQLiteDatabaseContext';
+import Logo from "../../../component/Logo";
+import TopMenu from "../../../component/TopMenu";
 
-const { width } = Dimensions.get('screen');
+const { width } = Dimensions.get('window');
+const image = require("../../../assets/images/new_course/new_course_2.png");
 
 const wishListData = [
     {
@@ -33,10 +39,33 @@ const wishListData = [
 ];
 
 const WishListScreen = () => {
+    const [listData, setListData] = useState([]);
+    // const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const navigation = useNavigation();
+    const { insertDataWithTransaction, getPostById, getCategories, getTags, searchPosts, homePageData } = useDatabase();
+    // const { id, category } = useLocalSearchParams();
+    
+    async function loadData(search="") {
+        // console.log('id :>> ', id);
+        try{
+            const data = await searchPosts({ search: search, page: 1, limit: 10, postType: 'post'});
+            // setData(data);
+            setListData(data);
+            setLoading(false);
+        }catch(err){
+            setLoading(false);
+            console.error('err :>> ', err);
+        }
+    }
+
+    useEffect(() => {
+        loadData();
+    }, []);
 
     const [showSnackBar, setShowSnackBar] = useState(false);
 
-    const [listData, setListData] = useState(wishListData);
+    
 
     const rightButton = ({ key }) => (
         <SwipeButtonsContainer>
@@ -59,48 +88,69 @@ const WishListScreen = () => {
         setShowSnackBar(true);
     };
 
-    function renderItem({ item }) {
+    function renderItem({ item, index }) {
         return (
-            <View key={item.key}>
+            <TouchableOpacity
+                onPress={() => navigation.push('postDetail/postDetailScreen', {
+                    image: image,
+                    id: item.ID,
+                    courseName: item.post_title,
+                    content: item.post_content,
+                    courseCategory: JSON.parse(item.categories).length > 0 ? JSON.parse(item.categories)[0] : "",
+                    courseRating: '5.0',
+                    courseNumberOfRating: '667',
+                    coursePrice: '567',
+                })}
+                activeOpacity={0.9}
+                key={item.ID} 
+            >
+            <View key={item.ID}>
                 <SwipeItem
                     style={styles.button}
-                    rightButtons={rightButton({ key: item.key })}
+                    rightButtons={rightButton({ key: item.ID })}
                 >
                     <View style={styles.wishlistContainerStyle}>
                         <Image
-                            source={item.image}
+                            source={image}
                             style={styles.wishlistImageStyle}
                             resizeMode="cover"
                         />
                         <View style={styles.wishlistInfoContainerStyle}>
                             <Text style={{ ...Fonts.black17Bold }}>
-                                {item.subject}
+                                {item.post_title}
                             </Text>
-                            <Text style={{ ...Fonts.black17Bold, marginVertical: Sizes.fixPadding }}>
-                                ${item.amount}
+                            <Text numberOfLines={3} style={{ textAlign: 'left' }}>
+                                {item.excerpt.replace(/<\/?[^>]+(>|$)|&#\d+;/g, '')}
                             </Text>
-                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                <Text style={{ ...Fonts.gray15Bold, marginRight: Sizes.fixPadding - 5.0 }}>
-                                    {item.rating}
-                                </Text>
-                                <MaterialIcons name="star" size={17} color="black" />
-                            </View>
                         </View>
                     </View>
                 </SwipeItem>
             </View>
+            </TouchableOpacity>
         )
     }
 
     return (
         <View style={{ flex: 1, backgroundColor: '#FAFAFA' }}>
             <CollapsingToolbar
+            leftItem={
+                <Logo text={ "Smart Income Tips"}/>
+            }
+            rightItem={<TopMenu/>}
+                
                 element={
-                    <Text style={{ ...Fonts.black25Bold }}>Wishlist</Text>
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                    <Text style={{ ...Fonts.white60Regular, marginBottom: 30 }}>Income Ideas</Text>
+                    <Search
+                        placeholder="Type to search..."
+                        onChange={(text) => loadData(text)}
+                        onSubmit={(event) => loadData(event.nativeEvent.text)}
+                    />
+                    </View>
                 }
                 toolbarColor={Colors.primaryColor}
                 toolBarMinHeight={40}
-                toolbarMaxHeight={230}
+                toolbarMaxHeight={240}
                 src={require('../../../assets/images/appbar_bg.png')}
             >
                 {listData.length == 0 ?
@@ -111,7 +161,7 @@ const WishListScreen = () => {
                     }}>
                         <FontAwesome5 name="heart-broken" size={50} color="gray" />
                         <Text style={{ ...Fonts.gray17Bold, marginTop: Sizes.fixPadding * 2.0 }}>
-                            No Item in Wishlist
+                            No Items Found
                         </Text>
                     </View>
                     :

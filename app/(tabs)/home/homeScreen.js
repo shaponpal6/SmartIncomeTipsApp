@@ -14,9 +14,20 @@ import { Colors, Fonts, Sizes, CommonStyles } from "../../../constant/styles";
 import { MaterialIcons } from '@expo/vector-icons';
 import Carousel from 'react-native-snap-carousel-v4';
 import CollapsingToolbar from "../../../component/sliverAppBar";
+import Roadmap from "../../../component/Roadmap";
+import TagsComponent from "../../../component/TagsComponent";
+import Logo from "../../../component/Logo";
+import TopMenu from "../../../component/TopMenu";
 import Button from "../../../component/Button";
 import FindMyIncomeTips from "../../../component/FindMyIncomeTips";
+import HtmlContentRenderer from '../../../component/HtmlContentRenderer';
+// import Roadmap from '../../../component/Roadmap';
+// import {fetchAndStoreData} from "../../../store/dataStoreService";
+import DatabaseTest from "../../../store/DatabaseTest";
+// import { fetchAndStoreData } from '../../../store/services/dataService'
+// import {initializeDatabase} from "../../../store/database";
 import { useNavigation } from "expo-router";
+import { useDatabase } from '../../../store/SQLiteDatabaseContext';
 
 const width = Dimensions.get('window').width;
 
@@ -36,17 +47,48 @@ const carouselItems = [
 
 const HomeScreen = () => {
 
+    const { homePageData, isDataEmpty } = useDatabase();
+
+    
+    const [data, setData] = useState({posts:[], tags:[], configs: [{key: 'site_title', value: 'Smart Income Tips'}], categories:[], courses: [], featurePosts: [], topPosts: [], newPosts: [], otherPosts: []});
     const [columns, setColumns] = useState(2);
+    const [loading, setLoading] = useState(true);
 
     const navigation = useNavigation();
 
     const flatListRef = useRef();
 
     useEffect(() => {
+        let isMounted = true;
+        async function loadData() {
+          if (isMounted) {
+            setLoading(true);
+            try {
+              // Initial data fetch when app loads
+            //   if(await isDataEmpty()) await updateData();
+              const fetchedData = await homePageData();
+              setData(fetchedData);
+            } catch (error) {
+              console.error('Error loading data:', error);
+            } finally {
+              setLoading(false);
+            }
+          }
+        }
+        loadData();
+        return () => {
+          isMounted = false;
+        };
+      }, []);
+      
+
+    useEffect(() => {
         const unsubscribe = navigation.addListener('focus', () => {
             flatListRef.current.startAutoplay((instantly = false));
         });
         return unsubscribe;
+        
+
     }, [navigation]);
 
     useEffect(() => {
@@ -55,60 +97,16 @@ const HomeScreen = () => {
         });
         return unsubscribe;
     }, [navigation]);
-
+    const site_title = data.configs.find(config => config.key === 'site_title') || {value: "Smart Income Tips"};
+    const categoryImage = require('../../../assets/images/bg.jpg');
     return (
         <View style={{ flex: 1, }}>
+            <ImageBackground source={categoryImage} style={{flex: 1}} imageStyle={{}}>
             <CollapsingToolbar
                 leftItem={
-                    <View
-                        style={{
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            width: '100%',
-                            alignItems: 'center',
-                            marginLeft: 40
-                        }}
-                    >
-                        <TouchableOpacity
-                            activeOpacity={0.9}
-                            onPress={() => navigation.push('accountSetting/accountSettingsScreen')}
-                        >
-                        <Text style={{ ...Fonts.black25Bold }}>Smart Income Tips</Text>
-                        </TouchableOpacity>
-                    </View>
+                    <Logo text={site_title?.value || "Smart Income Tips"}/>
                 }
-                rightItem={
-                    <View
-                        style={{
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            width: '100%',
-                            alignItems: 'center',
-                        }}
-                    >
-                        <TouchableOpacity
-                                activeOpacity={0.9}
-                                onPress={() => navigation.push('accountSetting/accountSettingsScreen')}
-                            >
-                            <MaterialIcons
-                                name="notifications"
-                                size={25}
-                                color="black"
-                                onPress={() => navigation.push('notification/notificationScreen')}
-                            />
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                                activeOpacity={0.9}
-                                onPress={() => navigation.push('accountSetting/accountSettingsScreen')}
-                            >
-                            <Image
-                                style={{ height: 30.0, width: 30.0, borderRadius: 15.0, }}
-                                source={require('../../../assets/images/user_profile/user_3.jpg')}
-                                resizeMode="contain"
-                            />
-                        </TouchableOpacity>
-                    </View>
-                }
+                rightItem={<TopMenu/>}
                 element={
                     <View
                         style={{
@@ -118,18 +116,28 @@ const HomeScreen = () => {
                             alignItems: 'center'
                         }}
                     >
-                        <FindMyIncomeTips/>
+                        {/* <FindMyIncomeTips/> */}
+                        
+                        {/* <Button
+                            title="Fetch and Store Data"
+                            onPress={handleFetchData}
+                        /> */}
                     </View>
                 }
                 toolbarColor={Colors.primaryColor}
-                toolBarMinHeight={40}
-                // toolbarMaxHeight={220}
-                src={require('../../../assets/images/appbar_bg.png')}
+                toolBarMinHeight={20}
+                toolbarMaxHeight={60}
+                // src={require('../../../assets/images/appbar_bg.png')}
             >
-                <View>
+                <View style={{backgroundColor: Colors.bgColor}}>
+                {/* <DatabaseTest/> */}
+                    
                     {autoScroller()}
-                    {title({ title: 'Top Income Sectors' })}
-                    {categoriesList()}
+                    
+                    {/* <Roadmap/> */}
+                    {/* <TagsComponent tags={data.categories} maxItemsToDisplay={20} /> */}
+                    {/* {title({ title: 'Top Income Sectors' })}
+                    {categoriesList()} */}
                     {title({ title: 'Top Income Sectors' })}
                     {categories()}
                     {title({ title: 'Popular Tips' })}
@@ -138,22 +146,27 @@ const HomeScreen = () => {
                     {popularCourses()}
                     {title({ title: 'New Courses' })}
                     {newCourses()}
-                    {title({ title: 'Instructor' })}
-                    {instructors()}
+                    {/* {title({ title: 'Instructor' })}
+                    {instructors()} */}
                 </View>
             </CollapsingToolbar>
+            </ImageBackground>
         </View>
     )
 
     function categories() {
+        const categoryImage = require('../../../assets/images/category/category_1.jpg');
+        const categories = data.categories;
+        if(loading) return <Text>Loading...</Text>
+        if(!loading && categories.length <= 0) return <Text>No Category</Text>
         const renderItem = ({ item }) => (
             <TouchableOpacity
                 activeOpacity={0.9}
-                onPress={() => navigation.push('category/categoriesScreen', { category: item.categoryName })}
+                onPress={() => navigation.push('category/categoriesScreen', {id: item.term_id, category: item.name })}
                 style={styles.categoryContainerStyle}
             >
                 <ImageBackground
-                    source={item.categoryImage}
+                    source={categoryImage}
                     style={{ width: 140.0, height: 140.0, borderRadius: 70.0, }}
                     resizeMode="cover"
                 >
@@ -166,17 +179,16 @@ const HomeScreen = () => {
                                 letterSpacing: 1
                             }}
                         >
-                            {item.categoryName}
+                            {item.name}
                         </Text>
                     </View>
                 </ImageBackground>
             </TouchableOpacity>
         )
-
         return (
             <FlatList
-                data={categoryList}
-                keyExtractor={(item) => `${item.id}`}
+                data={categories}
+                keyExtractor={(item) => `${item.term_id}`}
                 renderItem={renderItem}
                 showsHorizontalScrollIndicator={false}
                 horizontal={true}
@@ -188,14 +200,19 @@ const HomeScreen = () => {
     }
 
     function categoriesList() {
+        const categoryImage = require('../../../assets/images/category/category_1.jpg');
+        const categories = data.categories;
+        if(loading) return <Text>Loading...</Text>
+        if(!loading && categories.length <= 0) return <Text>No Category</Text>
+
         const renderItem = ({ item }) => (
             <TouchableOpacity
                 activeOpacity={0.9}
-                onPress={() => navigation.push('category/categoriesScreen', { category: item.categoryName })}
+                onPress={() => navigation.push('category/categoriesScreen', { id: item.term_id, category: item.name })}
                 style={styles.categoryListContainerStyle}
             >
                 <ImageBackground
-                    source={item.categoryImage}
+                    source={categoryImage}
                     style={styles.categoryImageBackgroundStyle}
                     imageStyle={{ borderRadius: 0 }} // Circular image
                     resizeMode="cover"
@@ -205,17 +222,16 @@ const HomeScreen = () => {
                             numberOfLines={2}
                             style={styles.categoryTextStyle}
                         >
-                            {item.categoryName}
+                            {item.name}
                         </Text>
                     </View>
                 </ImageBackground>
             </TouchableOpacity>
         );
-
         return (
             <FlatList
-                data={categoryList}
-                keyExtractor={(item) => `${item.id}`}
+                data={categories}
+                keyExtractor={(item) => `${item.term_id}`}
                 renderItem={renderItem}
                 numColumns={2}  // Creates a grid layout with 2 columns
                 contentContainerStyle={styles.categoryListContentStyle}
@@ -226,31 +242,50 @@ const HomeScreen = () => {
     }
 
     function autoScroller() {
-        const renderItem = ({ item }) => (
-            <ImageBackground
-                source={item.image}
-                style={{
-                    width: itemWidth - 10,
-                    height: 200,
-                    alignItems: "center",
-                    justifyContent: 'center',
-                    paddingHorizontal: Sizes.fixPadding
-                }}
-                borderRadius={Sizes.fixPadding - 5.0}
+        const image = require('../../../assets/images/category/category_1.jpg');
+        const posts = data.featurePosts;
+        if(loading) return <Text>Loading...</Text>
+        if(!loading && posts.length <= 0) return <Text>No items</Text>
+        const renderItem = ({ item, index }) => (
+            <TouchableOpacity
+                onPress={() => navigation.push('postDetail/postDetailScreen', {
+                    image: image,
+                    id: item.ID,
+                    courseName: item.post_title,
+                    content: item.post_content,
+                    courseCategory: JSON.parse(item.categories).length > 0 ? JSON.parse(item.categories)[0] : "",
+                    courseRating: '5.0',
+                    courseNumberOfRating: '667',
+                    coursePrice: '567',
+                })}
+                activeOpacity={0.9}
             >
-                <Text numberOfLines={1} style={{ ...Fonts.white25Bold }}>
-                    Shonda Rhymes
-                </Text>
-                <Text numberOfLines={2} style={{ ...Fonts.white15Regular, textAlign: 'center' }}>
-                    Shonda describes what fuels her passion
-                </Text>
-            </ImageBackground>
+                <ImageBackground
+                    source={image}
+                    style={{
+                        width: itemWidth - 6,
+                        height: 200,
+                        alignItems: "center",
+                        justifyContent: 'center',
+                        paddingHorizontal: Sizes.fixPadding
+                    }}
+                    borderRadius={Sizes.fixPadding - 5.0}
+                >
+                    <Text numberOfLines={2} style={{ ...Fonts.white25Bold }}>
+                        {item.post_title.replace(/<\/?[^>]+(>|$)|&#\d+;/g, '')}
+                    </Text>
+                        {/* <HtmlContentRenderer htmlContent={item.excerpt} /> */}
+                    <Text numberOfLines={3} style={{ ...Fonts.white15Regular, textAlign: 'center', marginTop: 4 }}>
+                        {item.excerpt.replace(/<\/?[^>]+(>|$)|&#\d+;/g, '')}
+                    </Text>
+                </ImageBackground>
+            </TouchableOpacity>
         )
 
         return (
             <Carousel
                 ref={flatListRef}
-                data={carouselItems}
+                data={posts}
                 sliderWidth={width}
                 itemWidth={itemWidth}
                 renderItem={renderItem}
@@ -263,42 +298,49 @@ const HomeScreen = () => {
     }
 
     function popularCourses() {
+        const image = require('../../../assets/images/category/category_1.jpg');
+        const posts = data.courses;
+        if(loading) return <Text>Loading...</Text>
+        if(!loading && posts.length <= 0) return <Text>No items</Text>
+
         const renderItem = ({ item }) => (
             <TouchableOpacity
                 onPress={() => navigation.push('courseDetail/courseDetailScreen',
                     {
-                        image: item.image,
-                        courseName: item.courseName,
-                        courseCategory: item.courseCategory,
-                        courseRating: item.courseRating,
-                        courseNumberOfRating: item.courseNumberOfRating,
-                        coursePrice: item.coursePrice,
+                        image: image,
+                        id: item.ID,
+                        courseName: item.post_title,
+                        content: item.post_content,
+                        courseCategory: JSON.parse(item.categories).length > 0 ? JSON.parse(item.categories)[0] : "",
+                        courseRating: '5.0',
+                        courseNumberOfRating: '667',
+                        coursePrice: '567',
                     }
                 )}
                 activeOpacity={0.9}
                 style={styles.popularCoursesContainerStyle}>
                 <Image
-                    source={item.image}
+                    source={image}
                     resizeMode="cover"
                     style={styles.popularCoursesImageStyle}
                 />
                 <View style={styles.popularCoursesInformationContainerStyle}>
                     <Text style={{ ...Fonts.gray15Regular }}>
-                        {item.courseName}
+                        {item.post_title}
                     </Text>
                     <Text style={{ ...Fonts.black17Bold, marginVertical: Sizes.fixPadding - 5.0 }}>
-                        {item.courseCategory}
+                        {JSON.parse(item.categories).length > 0 ? JSON.parse(item.categories)[0] : ""}
                     </Text>
                     <View style={{ backgroundColor: 'gray', height: 0.2, }}></View>
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: Sizes.fixPadding - 5.0 }}>
-                        <Text style={{ ...Fonts.black15Bold }}>{item.courseRating}</Text>
+                        <Text style={{ ...Fonts.black15Bold }}>{'5.0'}</Text>
                         <MaterialIcons name="star" size={17} color="black" />
                         <Text style={{ ...Fonts.black15Bold, marginLeft: Sizes.fixPadding - 5.0 }}>
-                            ({item.courseNumberOfRating})
+                            ({'768'})
                         </Text>
                     </View>
                     <Text style={{ ...Fonts.black19Bold, marginTop: Sizes.fixPadding }}>
-                        ${item.coursePrice}
+                        ${'59'}
                     </Text>
                 </View>
             </TouchableOpacity>
@@ -306,8 +348,8 @@ const HomeScreen = () => {
 
         return (
             <FlatList
-                data={popularCoursesList}
-                keyExtractor={(item) => `${item.courseId}`}
+                data={posts}
+                keyExtractor={(item) => `${item.ID}`}
                 renderItem={renderItem}
                 showsHorizontalScrollIndicator={false}
                 horizontal={true}
@@ -321,15 +363,22 @@ const HomeScreen = () => {
     }
 
     function popularPosts() {
+        const image = require('../../../assets/images/category/category_1.jpg');
+        const posts = data.topPosts;
+        if(loading) return <Text>Loading...</Text>
+        if(!loading && posts.length <= 0) return <Text>No items</Text>
+
         const renderItem = ({ item, index }) => (
             <TouchableOpacity
                 onPress={() => navigation.push('postDetail/postDetailScreen', {
-                    image: item.image,
-                    courseName: item.courseName,
-                    courseCategory: item.courseCategory,
-                    courseRating: item.courseRating,
-                    courseNumberOfRating: item.courseNumberOfRating,
-                    coursePrice: item.coursePrice,
+                    image: image,
+                    id: item.ID,
+                    courseName: item.post_title,
+                    content: item.post_content,
+                    courseCategory: JSON.parse(item.categories).length > 0 ? JSON.parse(item.categories)[0] : "",
+                    courseRating: '5.0',
+                    courseNumberOfRating: '667',
+                    coursePrice: '567',
                 })}
                 activeOpacity={0.9}
                 style={[
@@ -342,13 +391,13 @@ const HomeScreen = () => {
                 ]}
             >
                 <Image
-                    source={item.image}
+                    source={image}
                     resizeMode="cover"
                     style={styles.popularTipsImageStyle}
                 />
                 <View style={styles.popularTipsInformationContainerStyle}>
                     <Text style={{ ...Fonts.gray15Regular }}>
-                        {item.courseName}
+                        {item.post_title}
                     </Text>
                 </View>
             </TouchableOpacity>
@@ -357,9 +406,9 @@ const HomeScreen = () => {
         return (
             <ScrollView>
             <FlatList
-                data={popularCoursesList}
+                data={posts}
                 key={`flatlist-columns-${columns}`} // Use a unique key based on columns
-                keyExtractor={(item) => `${item.courseId}`}
+                keyExtractor={(item) => `${item.ID}-${columns}`}
                 renderItem={renderItem}
                 numColumns={columns} // Use the columns state here
                 showsHorizontalScrollIndicator={false}
@@ -377,42 +426,49 @@ const HomeScreen = () => {
     }
 
     function newCourses() {
+        const image = require('../../../assets/images/category/category_1.jpg');
+        const posts = data.topPosts;
+        if(loading) return <Text>Loading...</Text>
+        if(!loading && posts.length <= 0) return <Text>No items</Text>
+
         const renderItem = ({ item }) => (
             <TouchableOpacity
                 activeOpacity={0.9}
                 onPress={() => navigation.push('courseDetail/courseDetailScreen',
                     {
-                        image: item.image,
-                        courseName: item.courseName,
-                        courseCategory: item.courseCategory,
-                        courseRating: item.courseRating,
-                        courseNumberOfRating: item.courseNumberOfRating,
-                        coursePrice: item.coursePrice,
+                        image: image,
+                        id: item.ID,
+                        courseName: item.post_title,
+                        content: item.post_content,
+                        courseCategory: JSON.parse(item.categories).length > 0 ? JSON.parse(item.categories)[0] : "",
+                        courseRating: '5.0',
+                        courseNumberOfRating: '667',
+                        coursePrice: '567',
                     }
                 )}
                 style={styles.popularCoursesContainerStyle}>
                 <Image
-                    source={item.image}
+                    source={image}
                     resizeMode="cover"
                     style={styles.popularCoursesImageStyle}
                 />
                 <View style={styles.popularCoursesInformationContainerStyle}>
                     <Text style={{ ...Fonts.gray15Regular }}>
-                        {item.courseName}
+                        {item.post_title}
                     </Text>
                     <Text style={{ ...Fonts.black17Bold, marginVertical: Sizes.fixPadding - 5.0 }}>
-                        {item.courseCategory}
+                        {JSON.parse(item.categories).length > 0 ? JSON.parse(item.categories)[0] : ""}
                     </Text>
                     <View style={{ backgroundColor: 'gray', height: 0.2, }}></View>
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: Sizes.fixPadding - 5.0 }}>
-                        <Text style={{ ...Fonts.black15Bold }}>{item.courseRating}</Text>
+                        <Text style={{ ...Fonts.black15Bold }}>{'5.0'}</Text>
                         <MaterialIcons name="star" size={17} color="black" />
                         <Text style={{ ...Fonts.black15Bold, marginLeft: Sizes.fixPadding - 5.0 }}>
-                            ({item.courseNumberOfRating})
+                            ({'459'})
                         </Text>
                     </View>
                     <Text style={{ ...Fonts.black19Bold, marginTop: Sizes.fixPadding }}>
-                        ${item.coursePrice}
+                        ${'54'}
                     </Text>
                 </View>
             </TouchableOpacity>
@@ -420,8 +476,8 @@ const HomeScreen = () => {
 
         return (
             <FlatList
-                data={newCoursesList}
-                keyExtractor={(item) => `${item.courseId}`}
+                data={posts}
+                keyExtractor={(item) => `${item.ID}-'newCourse`}
                 renderItem={renderItem}
                 showsHorizontalScrollIndicator={false}
                 horizontal={true}

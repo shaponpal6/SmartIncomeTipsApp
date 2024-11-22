@@ -2,6 +2,7 @@ import React from "react";
 import { ImageBackground, Text, View, FlatList, ScrollView, StyleSheet } from "react-native";
 import { Fonts, Sizes } from "../../constant/styles";
 import { MaterialIcons } from '@expo/vector-icons';
+import HtmlContentRenderer from '../../component/HtmlContentRenderer';
 
 const learnFromCourseList = [
     {
@@ -26,14 +27,15 @@ const learnFromCourseList = [
     },
 ]
 
-const CourseOverViewScreen = () => {
+const CourseOverViewScreen = ({content}) => {
     return (
         <View style={styles.container}>
             <ScrollView
                 nestedScrollEnabled={true}
                 showsVerticalScrollIndicator={false}
             >
-                {dummyText()}
+                {/* {dummyText(content)} */}
+                <HtmlContentRenderer htmlContent={content} />
                 {divider()}
                 {title({ title: 'What you will get' })}
                 {getFromCourseInfo({
@@ -110,9 +112,10 @@ const CourseOverViewScreen = () => {
         )
     }
 
-    function dummyText() {
+    function dummyText(content) {
         return (
             <View>
+                <Text>{content}</Text>
                 <Text style={{ ...Fonts.indigoColor18Bold, marginTop: Sizes.fixPadding * 4.0 }}>
                     Lorem Ipsum is simply dummy text of the printing and typesetting industry
                 </Text>

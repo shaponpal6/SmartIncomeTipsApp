@@ -2,6 +2,8 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
+import { SQLiteDatabaseProvider, useDatabase } from '../store/SQLiteDatabaseContext';
+
 
 SplashScreen.preventAutoHideAsync();
 
@@ -22,6 +24,7 @@ export default function RootLayout() {
   }
 
   return (
+    <SQLiteDatabaseProvider>
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
       <Stack.Screen name="onBoarding/onBoardingScreen" options={{ gestureEnabled: false }} />
@@ -37,6 +40,9 @@ export default function RootLayout() {
       <Stack.Screen name="notification/notificationScreen" />
       <Stack.Screen name="accountSetting/accountSettingsScreen" />
       <Stack.Screen name="appSetting/appSettingScreen"/>
+      <Stack.Screen name="user/profileScreen"/>
+      <Stack.Screen name="roadmap/taskScreen"/>
     </Stack>
+    </SQLiteDatabaseProvider>
   );
 }

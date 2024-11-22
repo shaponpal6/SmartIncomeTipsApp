@@ -1,10 +1,22 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Text, View, StyleSheet, TextInput } from "react-native";
 import { Colors, Fonts, Sizes } from "../../../constant/styles";
 import { MaterialIcons } from '@expo/vector-icons';
 import CollapsingToolbar from "../../../component/sliverAppBar";
+import FindMyIncomeTips from "../../../component/FindMyIncomeTips";
+import Logo from "../../../component/Logo";
+import TopMenu from "../../../component/TopMenu";
+import Button from "../../../component/Button";
+import { useDatabase } from '../../../store/SQLiteDatabaseContext';
+import { useLocalSearchParams, useNavigation } from "expo-router";
 
 const SearchScreen = () => {
+    const [listData, setListData] = useState([]);
+    // const [data, setData] = useState([]);
+    const [page, setPage] = useState(1);
+    const [loading, setLoading] = useState(true);
+    const navigation = useNavigation();
+    const { insertDataWithTransaction, getPostById, getCategories, getTags, searchPosts, homePageData } = useDatabase();
 
     const [state, setState] = useState({
         isTextFieldFocus: false
@@ -14,30 +26,44 @@ const SearchScreen = () => {
 
     const { isTextFieldFocus } = state;
 
+    async function loadData({search="", page=1, limit= 10}) {
+        // console.log('id :>> ', id);
+        try{
+            const data = await searchPosts({ search: search, page: page, limit: limit, postType: 'post'});
+            // setData(data);
+            setListData(data);
+            setLoading(false);
+        }catch(err){
+            setLoading(false);
+            console.error('err :>> ', err);
+        }
+    }
+
+    useEffect(() => {
+        loadData({});
+    }, []);
+
+    const getMoreIdeas = () => {
+        loadData({page: page+1})
+        setPage(page+1)
+    }
+
     return (
         <View style={{ flex: 1 }}>
             <CollapsingToolbar
+            leftItem={
+                <Logo text={ "Smart Income Tips"}/>
+            }
+            rightItem={<TopMenu/>}
                 element={
                     <View style={styles.textInputContainerStyle}>
-                        <MaterialIcons name="search" size={24}
-                            color={isTextFieldFocus ? Colors.primaryColor : "gray"}
-                            style={{
-                                position: 'absolute',
-                                left: 10.0,
-                            }}
-                        />
-                        <TextInput
-                            placeholder="Try Easy ways write a novel"
-                            style={{ marginLeft: Sizes.fixPadding * 6.0, ...Fonts.black15Regular }}
-                            onFocus={() => updateState({ isTextFieldFocus: true })}
-                            onBlur={() => updateState({ isTextFieldFocus: false })}
-                            selectionColor={Colors.primaryColor}
-                        />
+                       
+                        <FindMyIncomeTips/>
                     </View>
                 }
                 toolbarColor={Colors.primaryColor}
                 toolBarMinHeight={40}
-                toolbarMaxHeight={230}
+                toolbarMaxHeight={380}
                 src={require('../../../assets/images/appbar_bg.png')}
             >
                 <View style={{
@@ -45,14 +71,13 @@ const SearchScreen = () => {
                     paddingHorizontal: Sizes.fixPadding * 2.0
                 }}>
                     {popularTagsTitle()}
-                    {popularTag({ search: 'Business & Management' })}
-                    {popularTag({ search: 'Creative Art & Media' })}
-                    {popularTag({ search: 'Health & Psychology' })}
-                    {popularTag({ search: 'History' })}
-                    {popularTag({ search: 'Languages & Cultures' })}
-                    {popularTag({ search: 'Science,Engineering & Maths' })}
-                    {popularTag({ search: 'Study Skills' })}
-                    {popularTag({ search: 'Tech & Coding' })}
+                    {listData.map((item) => popularTag({ search: item.post_title.replace(/<\/?[^>]+(>|$)|&#\d+;/g, '') }))}
+                    {/* {popularTag({ search: 'Business & Management' })} */}
+                    <View style={{width: '100%', height:20}}/>
+                    <Button
+                        title="Get More Income Ideas"
+                        onPress={getMoreIdeas}
+                    />
                 </View>
             </CollapsingToolbar>
         </View>
@@ -70,7 +95,7 @@ const SearchScreen = () => {
     function popularTagsTitle() {
         return (
             <Text style={{ ...Fonts.black25Bold }}>
-                Popular Tags
+                Popular Ideas
             </Text>
         )
     }
@@ -78,7 +103,7 @@ const SearchScreen = () => {
 
 const styles = StyleSheet.create({
     textInputContainerStyle: {
-        backgroundColor: 'white',
+        backgroundColor: 'transparent',
         width: '100%',
         borderRadius: Sizes.fixPadding * 3.0,
         paddingVertical: Sizes.fixPadding,

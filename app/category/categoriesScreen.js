@@ -1,11 +1,13 @@
-import React from "react";
-import { Text, View, StyleSheet, Image, Dimensions, FlatList, } from "react-native";
+import React, {useEffect, useState} from "react";
+import { Text, View, StyleSheet, Image, Dimensions, FlatList, TouchableOpacity} from "react-native";
 import { Colors, Fonts, Sizes, CommonStyles } from "../../constant/styles";
 import { MaterialIcons } from '@expo/vector-icons';
 import MyStatusBar from "../../component/myStatusBar";
 import { useLocalSearchParams, useNavigation } from "expo-router";
+import { useDatabase } from '../../store/SQLiteDatabaseContext';
 
 const { width } = Dimensions.get('window');
+const image = require("../../assets/images/new_course/new_course_2.png");
 
 const categoryList = [
     {
@@ -67,49 +69,83 @@ const categoryList = [
 ];
 
 const CategoriesScreen = () => {
-
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(true);
     const navigation = useNavigation();
-
-    const { category } = useLocalSearchParams();
+    const { insertDataWithTransaction, getPostById, getCategories, getTags, searchPosts, homePageData } = useDatabase();
+    const { id, category } = useLocalSearchParams();
+    
+    useEffect(() => {
+        async function loadData() {
+            // console.log('id :>> ', id);
+            try{
+                const data = await searchPosts({categories: [id], page: 1, limit: 10, postType: 'post'});
+                setData(data);
+                setLoading(false);
+            }catch(err){
+                setLoading(false);
+                console.error('err :>> ', err);
+            }
+        }
+        loadData();
+    }, [id]);
 
     return (
         <View style={{ flex: 1, backgroundColor: '#FAFAFA' }}>
             <MyStatusBar />
             <View style={{ flex: 1 }}>
                 {header()}
-                {categories()}
+                {data.length > 0 ? 
+                categories(data) : <Text style={{ flex: 1 }}>{loading ? 'Loading...' : 'No items'}</Text>}
             </View>
         </View>
     )
 
-    function categories() {
+    function categories(data) {
         const renderItem = ({ item }) => (
-            <View style={styles.categoriesContainerStyle}>
-                <Image
-                    source={item.image}
-                    style={styles.categoryImageStyle}
-                    resizeMode="cover"
-                />
-                <View style={styles.categoryInfoContainerStyle}>
-                    <Text style={{ ...Fonts.black17Bold }}>
-                        {item.name}
-                    </Text>
-                    <Text style={{ ...Fonts.black17Bold, marginVertical: Sizes.fixPadding }}>
-                        ${item.price}
-                    </Text>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <Text style={{ ...Fonts.gray15Bold, marginRight: Sizes.fixPadding - 5.0 }}>
-                            {item.rating}
+            <TouchableOpacity
+                onPress={() => navigation.push('postDetail/postDetailScreen', {
+                    image: image,
+                    id: item.ID,
+                    courseName: item.post_title,
+                    content: item.post_content,
+                    courseCategory: JSON.parse(item.categories).length > 0 ? JSON.parse(item.categories)[0] : "",
+                    courseRating: '5.0',
+                    courseNumberOfRating: '667',
+                    coursePrice: '567',
+                })}
+                activeOpacity={0.9}
+            >
+                <View style={styles.categoriesContainerStyle}>
+                    <Image
+                        source={image}
+                        style={styles.categoryImageStyle}
+                        resizeMode="cover"
+                    />
+                    <View style={styles.categoryInfoContainerStyle}>
+                        <Text style={{ ...Fonts.black17Bold }}>
+                            {item.post_title}
                         </Text>
-                        <MaterialIcons name="star" size={17} color="black" />
+                        {/* <Text style={{ ...Fonts.black17Bold, marginVertical: Sizes.fixPadding }}>
+                            {item.exce}
+                        </Text> */}
+                        <Text numberOfLines={3} style={{ textAlign: 'left' }}>
+                            {item.excerpt.replace(/<\/?[^>]+(>|$)|&#\d+;/g, '')}
+                        </Text>
+                        {/* <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <Text style={{ ...Fonts.gray15Bold, marginRight: Sizes.fixPadding - 5.0 }}>
+                                {'5.0'}
+                            </Text>
+                            <MaterialIcons name="star" size={17} color="black" />
+                        </View> */}
                     </View>
                 </View>
-            </View>
+            </TouchableOpacity>
         )
         return (
             <FlatList
-                data={categoryList}
-                keyExtractor={(item) => `${item.id}`}
+                data={data}
+                keyExtractor={(item) => `${item.ID}`}
                 renderItem={renderItem}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ paddingVertical: Sizes.fixPadding }}

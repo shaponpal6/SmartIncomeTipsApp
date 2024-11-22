@@ -4,6 +4,9 @@ import CollapsingToolbar from "../../../component/sliverAppBar";
 import { Fonts, Sizes, Colors } from "../../../constant/styles";
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from "expo-router";
+import Roadmap from "../../../component/Roadmap";
+import Logo from "../../../component/Logo";
+import TopMenu from "../../../component/TopMenu";
 
 const { width } = Dimensions.get('screen');
 
@@ -14,6 +17,10 @@ const SettingScreen = () => {
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <CollapsingToolbar
+            leftItem={
+                <Logo text={"Smart Income Tips"}/>
+            }
+            rightItem={<TopMenu/>}
                 element={
                     <Text style={{ ...Fonts.black25Bold }}>Settings</Text>
                 }
@@ -27,6 +34,7 @@ const SettingScreen = () => {
                     marginHorizontal: Sizes.fixPadding * 2.0,
                     marginTop: Sizes.fixPadding * 4.0
                 }}>
+                    <Roadmap/>
                     <TouchableOpacity
                         activeOpacity={0.9}
                         onPress={() => navigation.push('accountSetting/accountSettingsScreen')}

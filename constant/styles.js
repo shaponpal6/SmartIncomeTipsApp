@@ -223,11 +223,17 @@ export const Fonts = {
 }
 
 export const Colors = {
-    primaryColor: '#FFC226',
+    // primaryColor2: '#FFC226',
+    primaryColor: '#FFFFFF',
+    bgColor: '#EEEEEE',
+    bgColor2: '#D4F6FF',
     blackColor: '#000000',
+    whiteColor2: '#D4F6FF',
     whiteColor: '#FFFFFF',
-    orangeColor: '#FF9800',
+    orangeColor: '#000000',
+    // orangeColor: '#FF9800',
     grayColor: '#898989',
+    // grayColor: '#C5D3E8',
 }
 
 export const Sizes = {

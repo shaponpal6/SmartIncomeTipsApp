@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     Text,
     View,
@@ -14,6 +14,7 @@ import MyStatusBar from "../../component/myStatusBar";
 import { Snackbar } from "react-native-paper";
 import CourseOverViewScreen from "../courseOverView/courseOverViewScreen";
 import { useLocalSearchParams, useNavigation } from "expo-router";
+// import {getPosts} from "../../store/dataService";
 
 const { width } = Dimensions.get('screen');
 
@@ -25,9 +26,22 @@ const PostDetailScreen = () => {
 
     const [showAccessDialog, setshowAccessDialog] = useState(false);
 
-    const { image, courseName, courseCategory, courseRating, courseNumberOfRating, coursePrice } = useLocalSearchParams();
+    const { image, courseName, content, courseCategory, courseRating, courseNumberOfRating, coursePrice } = useLocalSearchParams();
     const image2= require('../../assets/images/new_course/new_course_3.png');
 
+    const [posts, setPosts] = useState([]);
+
+    // useEffect(() => {
+    //     const loadPosts = async () => {
+    //         const fetchedPosts = await getPosts();
+    //         console.log('fetchedPosts :>> ', fetchedPosts);
+    //         setPosts(fetchedPosts);
+    //     };
+
+    //     loadPosts();
+    // }, []);
+
+    console.log('posts :>> ', posts);
     return (
         <View style={{ flex: 1, }}>
             <MyStatusBar />
@@ -65,7 +79,7 @@ const PostDetailScreen = () => {
                 toolbarMaxHeight={370}
                 isImageBlur={true}
                 src={image2}>
-                <CourseOverViewScreen/>
+                <CourseOverViewScreen content={content} />
                 {/* <TabBarScreen navigation={navigation} setshowAccessDialog={setshowAccessDialog} /> */}
             </CollapsingToolbar>
 
