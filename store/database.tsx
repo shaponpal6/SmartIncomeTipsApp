@@ -48,7 +48,7 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
         image TEXT,
         count INTEGER,
         slug TEXT,
-        description TEXT
+        desc TEXT
       );
 
       CREATE TABLE IF NOT EXISTS ${TABLE_PREFIX}categories (

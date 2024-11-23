@@ -21,6 +21,7 @@ import TopMenu from "../../../component/TopMenu";
 import Button from "../../../component/Button";
 import FindMyIncomeTips from "../../../component/FindMyIncomeTips";
 import HtmlContentRenderer from '../../../component/HtmlContentRenderer';
+import LazyImage from '../../../component/LazyImage';
 // import Roadmap from '../../../component/Roadmap';
 // import {fetchAndStoreData} from "../../../store/dataStoreService";
 import DatabaseTest from "../../../store/DatabaseTest";
@@ -133,6 +134,11 @@ const HomeScreen = () => {
                 {/* <DatabaseTest/> */}
                     
                     {autoScroller()}
+
+                    <LazyImage 
+                    imageUrl="https://smartincome.tips/wp-content/uploads/2024/09/image_fx_-27.png" 
+                    fallbackUrl="https://placehold.co/600x400?text=Image+Unavailable" 
+                    />
                     
                     {/* <Roadmap/> */}
                     {/* <TagsComponent tags={data.categories} maxItemsToDisplay={20} /> */}
