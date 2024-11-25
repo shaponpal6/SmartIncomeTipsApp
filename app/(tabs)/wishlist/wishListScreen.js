@@ -6,7 +6,6 @@ import {
     StyleSheet,
     TouchableOpacity,
     Dimensions,
-    Image,
 } from "react-native";
 import { Colors, Fonts, Sizes, CommonStyles } from "../../../constant/styles";
 import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
@@ -17,6 +16,7 @@ import { Snackbar } from 'react-native-paper';
 import { useDatabase } from '../../../store/SQLiteDatabaseContext';
 import Logo from "../../../component/Logo";
 import TopMenu from "../../../component/TopMenu";
+import Image from '../../../component/LazyImage';
 
 const { width } = Dimensions.get('window');
 const image = require("../../../assets/images/new_course/new_course_2.png");
@@ -111,7 +111,7 @@ const WishListScreen = () => {
                 >
                     <View style={styles.wishlistContainerStyle}>
                         <Image
-                            source={image}
+                            source={item?.post_image !== "" ? item.post_image : image}
                             style={styles.wishlistImageStyle}
                             resizeMode="cover"
                         />
@@ -120,7 +120,7 @@ const WishListScreen = () => {
                                 {item.post_title}
                             </Text>
                             <Text numberOfLines={3} style={{ textAlign: 'left' }}>
-                                {item.excerpt.replace(/<\/?[^>]+(>|$)|&#\d+;/g, '')}
+                                {item.post_content.replace(/<\/?[^>]+(>|$)|&#\d+;/g, '')}
                             </Text>
                         </View>
                     </View>

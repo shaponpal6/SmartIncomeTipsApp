@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 // Utility function to generate a random ID
 const generateRandomId = () => Math.floor(Math.random() * 1000);
-const FindMyIncomeTips = () => {
+const FindMyIncomeTips = ({onChange=null}) => {
     const [step, setStep] = useState(1);
     const [selectedProfession, setSelectedProfession] = useState(null);
     const [selectedInterest, setSelectedInterest] = useState(null);
@@ -25,10 +25,13 @@ const FindMyIncomeTips = () => {
     };
 
     const handleButtonPress = () => {
-        Alert.alert(
-            "Form Values",
-            `Profession: ${selectedProfession}, Interest: ${selectedInterest}, Skills: ${selectedSkills}`
-        );
+        if( onChange){
+            onChange({profession: selectedProfession, interest: selectedInterest, skills: selectedSkills})
+        }
+        // Alert.alert(
+        //     "Form Values",
+        //     `Profession: ${selectedProfession}, Interest: ${selectedInterest}, Skills: ${selectedSkills}`
+        // );
     };
 
     const professionOptions = [

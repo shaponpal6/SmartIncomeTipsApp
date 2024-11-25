@@ -1,10 +1,11 @@
 import React, {useEffect, useState} from "react";
-import { Text, View, StyleSheet, Image, Dimensions, FlatList, TouchableOpacity} from "react-native";
+import { Text, View, StyleSheet, Dimensions, FlatList, TouchableOpacity} from "react-native";
 import { Colors, Fonts, Sizes, CommonStyles } from "../../constant/styles";
 import { MaterialIcons } from '@expo/vector-icons';
 import MyStatusBar from "../../component/myStatusBar";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useDatabase } from '../../store/SQLiteDatabaseContext';
+import Image from '../../component/LazyImage';
 
 const { width } = Dimensions.get('window');
 const image = require("../../assets/images/new_course/new_course_2.png");
@@ -69,26 +70,36 @@ const categoryList = [
 ];
 
 const CategoriesScreen = () => {
+    const navigation = useNavigation();
+    const { id, category } = useLocalSearchParams();
+    const { insertDataWithTransaction,getPostById, getCategories, getTags, searchPosts, homePageData } = useDatabase();
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
-    const navigation = useNavigation();
-    const { insertDataWithTransaction, getPostById, getCategories, getTags, searchPosts, homePageData } = useDatabase();
-    const { id, category } = useLocalSearchParams();
-    
+
     useEffect(() => {
+        let isMounted = true;
         async function loadData() {
-            // console.log('id :>> ', id);
-            try{
+          if (isMounted) {
+            setLoading(true);
+            try {
+              // Initial data fetch when app loads
+            //   if(await isDataEmpty()) await updateData();
                 const data = await searchPosts({categories: [id], page: 1, limit: 10, postType: 'post'});
                 setData(data);
-                setLoading(false);
-            }catch(err){
-                setLoading(false);
-                console.error('err :>> ', err);
+            } catch (error) {
+              console.error('Error loading data:', error);
+            } finally {
+              setLoading(false);
             }
+          }
         }
         loadData();
-    }, [id]);
+        return () => {
+          isMounted = false;
+        };
+      }, [id]);
+
+    if(loading) return <Text>Loading...</Text>
 
     return (
         <View style={{ flex: 1, backgroundColor: '#FAFAFA' }}>
@@ -105,20 +116,13 @@ const CategoriesScreen = () => {
         const renderItem = ({ item }) => (
             <TouchableOpacity
                 onPress={() => navigation.push('postDetail/postDetailScreen', {
-                    image: image,
-                    id: item.ID,
-                    courseName: item.post_title,
-                    content: item.post_content,
-                    courseCategory: JSON.parse(item.categories).length > 0 ? JSON.parse(item.categories)[0] : "",
-                    courseRating: '5.0',
-                    courseNumberOfRating: '667',
-                    coursePrice: '567',
+                    id: item.ID
                 })}
                 activeOpacity={0.9}
             >
                 <View style={styles.categoriesContainerStyle}>
                     <Image
-                        source={image}
+                        source={item?.post_image?.length > 10 ? item.post_image : image}
                         style={styles.categoryImageStyle}
                         resizeMode="cover"
                     />
@@ -129,8 +133,8 @@ const CategoriesScreen = () => {
                         {/* <Text style={{ ...Fonts.black17Bold, marginVertical: Sizes.fixPadding }}>
                             {item.exce}
                         </Text> */}
-                        <Text numberOfLines={3} style={{ textAlign: 'left' }}>
-                            {item.excerpt.replace(/<\/?[^>]+(>|$)|&#\d+;/g, '')}
+                        <Text numberOfLines={3} style={{ marginTop: -10, textAlign: 'left' }}>
+                            {item.post_content.replace(/<\/?[^>]+(>|$)|&#\d+;/g, '')}
                         </Text>
                         {/* <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             <Text style={{ ...Fonts.gray15Bold, marginRight: Sizes.fixPadding - 5.0 }}>

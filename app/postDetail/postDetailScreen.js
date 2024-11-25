@@ -15,33 +15,45 @@ import { Snackbar } from "react-native-paper";
 import CourseOverViewScreen from "../courseOverView/courseOverViewScreen";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 // import {getPosts} from "../../store/dataService";
+import { useDatabase } from '../../store/SQLiteDatabaseContext';
 
 const { width } = Dimensions.get('screen');
 
 const PostDetailScreen = () => {
-
     const navigation = useNavigation();
-
     const [isInWatchList, setIsInWatchList] = useState(false);
-
-    const [showAccessDialog, setshowAccessDialog] = useState(false);
-
-    const { image, courseName, content, courseCategory, courseRating, courseNumberOfRating, coursePrice } = useLocalSearchParams();
+    const [showAccessDialog, setShowAccessDialog] = useState(false);
+    const { id } = useLocalSearchParams();
     const image2= require('../../assets/images/new_course/new_course_3.png');
+    const { getPostById } = useDatabase();
+    const [post, setPost] = useState({});
+    const [loading, setLoading] = useState(true);
 
-    const [posts, setPosts] = useState([]);
+    useEffect(() => {
+        let isMounted = true;
+        async function loadData() {
+          if (isMounted) {
+            setLoading(true);
+            try {
+              // Initial data fetch when app loads
+            //   if(await isDataEmpty()) await updateData();
+              const fetchedData = await getPostById(id);
+              setPost(fetchedData);
+            } catch (error) {
+              console.error('Error loading data:', error);
+            } finally {
+              setLoading(false);
+            }
+          }
+        }
+        loadData();
+        return () => {
+          isMounted = false;
+        };
+      }, [id]);
 
-    // useEffect(() => {
-    //     const loadPosts = async () => {
-    //         const fetchedPosts = await getPosts();
-    //         console.log('fetchedPosts :>> ', fetchedPosts);
-    //         setPosts(fetchedPosts);
-    //     };
-
-    //     loadPosts();
-    // }, []);
-
-    console.log('posts :>> ', posts);
+    // console.log('posts :>> ', post);
+    if(loading) return <Text>Loading...</Text>
     return (
         <View style={{ flex: 1, }}>
             <MyStatusBar />
@@ -78,16 +90,16 @@ const PostDetailScreen = () => {
                 toolBarMinHeight={40}
                 toolbarMaxHeight={370}
                 isImageBlur={true}
-                src={image2}>
-                <CourseOverViewScreen content={content} />
-                {/* <TabBarScreen navigation={navigation} setshowAccessDialog={setshowAccessDialog} /> */}
+                src={post?.post_image?.length > 10 ? {uri: post.post_image} :image2}>
+                <CourseOverViewScreen content={post?.post_content !=="" ? post.post_content : ""} />
+                {/* <TabBarScreen navigation={navigation} setShowAccessDialog={setShowAccessDialog} /> */}
             </CollapsingToolbar>
 
             <Snackbar
                 style={styles.snackbarStyle}
                 elevation={0}
                 visible={showAccessDialog}
-                onDismiss={() => setshowAccessDialog(false)}
+                onDismiss={() => setShowAccessDialog(false)}
             >
                 First purchase this course then you access this lesson.
             </Snackbar>
@@ -97,9 +109,9 @@ const PostDetailScreen = () => {
     function courseInfo() {
         return (
             <View>
-                <Text style={{ ...Fonts.primaryColor16Regular }}>{courseCategory}</Text>
+                <Text style={{ ...Fonts.primaryColor16Regular }}>{post?.categories !=="" ? JSON.parse(post.categories).length > 0 ? JSON.parse(post.categories)[0] : "" : ""}</Text>
                 <Text style={{ ...Fonts.primaryColor28Bold, marginVertical: Sizes.fixPadding }}>
-                    {courseName}
+                    {post?.post_title !=="" ? post.post_title : ""}
                 </Text>
             </View>
         )

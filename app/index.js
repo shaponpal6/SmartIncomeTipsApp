@@ -26,6 +26,7 @@ const SplashScreen = () => {
                     await new Promise(resolve => setTimeout(resolve, 1500));
                     // if (!await isDataEmpty()) {
                         const isEmpty = await isDataEmpty();
+                        // const isEmpty = true;
                         console.log('isEmpty :>> ', isEmpty);
                         if (isEmpty) {
                             await migrateDB();

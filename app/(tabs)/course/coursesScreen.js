@@ -1,11 +1,12 @@
 import React, { useState, useEffect }  from "react";
-import { Text, View, StyleSheet, Dimensions, Image, TouchableOpacity } from "react-native";
+import { Text, View, StyleSheet, Dimensions, TouchableOpacity } from "react-native";
 import { Fonts, Sizes, Colors, CommonStyles } from "../../../constant/styles";
 import CollapsingToolbar from "../../../component/sliverAppBar";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import Search from "../../../component/Search";
 import Logo from "../../../component/Logo";
 import TopMenu from "../../../component/TopMenu";
+import Image from '../../../component/LazyImage';
 
 import { useDatabase } from '../../../store/SQLiteDatabaseContext';
 
@@ -123,7 +124,7 @@ const CoursesScreen = () => {
             >
             <View key={item.ID} style={styles.courseContainerStyle}>
                 <Image
-                    source={image}
+                    source={item?.post_image !==""? item.post_image : image}
                     style={styles.courseImageStyle}
                     resizeMode="cover"
                 />
@@ -132,7 +133,7 @@ const CoursesScreen = () => {
                         {item.post_title}
                     </Text>
                     <Text numberOfLines={3} style={{ textAlign: 'left' }}>
-                        {item.excerpt.replace(/<\/?[^>]+(>|$)|&#\d+;/g, '')}
+                        {item.post_content.replace(/<\/?[^>]+(>|$)|&#\d+;/g, '')}
                     </Text>
                     {/* <Text style={{ ...Fonts.indigoColor16Bold }}>
                         {item.getVideos}/{item.totalVideos} Videos

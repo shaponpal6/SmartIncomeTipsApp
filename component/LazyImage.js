@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Image, View, StyleSheet, ActivityIndicator } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 
-const LazyImage = ({ imageUrl, fallbackUrl = 'https://placehold.co/600x400' }) => {
+const LazyImage = ({ source, resizeMode="cover",
+    style={}, fallbackUrl = 'https://placehold.co/600x400' }) => {
   const [localUri, setLocalUri] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -18,7 +19,7 @@ const LazyImage = ({ imageUrl, fallbackUrl = 'https://placehold.co/600x400' }) =
       setLoading(true);
       setError(false);
 
-      const fileName = getFileName(imageUrl);
+      const fileName = getFileName(source);
       const fileUri = `${downloadDirectory}${fileName}`;
 
       try {
@@ -28,7 +29,7 @@ const LazyImage = ({ imageUrl, fallbackUrl = 'https://placehold.co/600x400' }) =
           setLocalUri(fileUri); // Load from local storage
         } else {
           // Download the image
-          const downloadResult = await FileSystem.downloadAsync(imageUrl, fileUri);
+          const downloadResult = await FileSystem.downloadAsync(source, fileUri);
           setLocalUri(downloadResult.uri);
         }
       } catch (error) {
@@ -40,29 +41,30 @@ const LazyImage = ({ imageUrl, fallbackUrl = 'https://placehold.co/600x400' }) =
     };
 
     fetchImage();
-  }, [imageUrl]);
+  }, [source]);
 
   return (
-    <View style={styles.container}>
-      {loading ? (
+    // <View style={styles.container}>
+      loading ? (
         <Image
           source={{ uri: 'https://placehold.co/600x400?text=Loading...' }}
-          style={styles.image}
-          resizeMode="cover"
+          style={[styles.image, style]}
+          resizeMode={resizeMode}
         />
       ) : (
         <Image
           source={{ uri: error ? fallbackUrl : localUri }}
-          style={styles.image}
-          resizeMode="cover"
+          style={[styles.image, style]}
+          resizeMode={resizeMode}
         />
-      )}
-    </View>
+      )
+    // </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     width: '100%',
     aspectRatio: 16 / 9,
     justifyContent: 'center',

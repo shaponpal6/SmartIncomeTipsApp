@@ -4,10 +4,10 @@ import {
     View,
     StyleSheet,
     Dimensions,
-    ImageBackground,
+    ImageBackground as ImageBackgroundRoot,
     TouchableOpacity,
     FlatList,
-    Image,
+    // Image,
     ScrollView
 } from "react-native";
 import { Colors, Fonts, Sizes, CommonStyles } from "../../../constant/styles";
@@ -21,7 +21,8 @@ import TopMenu from "../../../component/TopMenu";
 import Button from "../../../component/Button";
 import FindMyIncomeTips from "../../../component/FindMyIncomeTips";
 import HtmlContentRenderer from '../../../component/HtmlContentRenderer';
-import LazyImage from '../../../component/LazyImage';
+import Image from '../../../component/LazyImage';
+import ImageBackground from '../../../component/LazyImageBackground';
 // import Roadmap from '../../../component/Roadmap';
 // import {fetchAndStoreData} from "../../../store/dataStoreService";
 import DatabaseTest from "../../../store/DatabaseTest";
@@ -102,7 +103,7 @@ const HomeScreen = () => {
     const categoryImage = require('../../../assets/images/bg.jpg');
     return (
         <View style={{ flex: 1, }}>
-            <ImageBackground source={categoryImage} style={{flex: 1}} imageStyle={{}}>
+            <ImageBackgroundRoot source={categoryImage} style={{flex: 1}} imageStyle={{}}>
             <CollapsingToolbar
                 leftItem={
                     <Logo text={site_title?.value || "Smart Income Tips"}/>
@@ -134,11 +135,6 @@ const HomeScreen = () => {
                 {/* <DatabaseTest/> */}
                     
                     {autoScroller()}
-
-                    <LazyImage 
-                    imageUrl="https://smartincome.tips/wp-content/uploads/2024/09/image_fx_-27.png" 
-                    fallbackUrl="https://placehold.co/600x400?text=Image+Unavailable" 
-                    />
                     
                     {/* <Roadmap/> */}
                     {/* <TagsComponent tags={data.categories} maxItemsToDisplay={20} /> */}
@@ -156,7 +152,7 @@ const HomeScreen = () => {
                     {instructors()} */}
                 </View>
             </CollapsingToolbar>
-            </ImageBackground>
+            </ImageBackgroundRoot>
         </View>
     )
 
@@ -165,6 +161,7 @@ const HomeScreen = () => {
         const categories = data.categories;
         if(loading) return <Text>Loading...</Text>
         if(!loading && categories.length <= 0) return <Text>No Category</Text>
+        console.log('categories :>> ', categories[2]);
         const renderItem = ({ item }) => (
             <TouchableOpacity
                 activeOpacity={0.9}
@@ -172,8 +169,9 @@ const HomeScreen = () => {
                 style={styles.categoryContainerStyle}
             >
                 <ImageBackground
-                    source={categoryImage}
-                    style={{ width: 140.0, height: 140.0, borderRadius: 70.0, }}
+                    source={item?.image?.length >10 ? {uri: item.image} : categoryImage}
+                    // source={{uri: 'https://legacy.reactjs.org/logo-og.png'}}
+                    style={{ width: 140.0, height: 140.0, borderRadius: 70.0 }}
                     resizeMode="cover"
                 >
                     <View style={styles.categoryBlurContainerStyle}>
@@ -185,6 +183,7 @@ const HomeScreen = () => {
                                 letterSpacing: 1
                             }}
                         >
+                            {/* {item?.image?.length} */}
                             {item.name}
                         </Text>
                     </View>
@@ -218,7 +217,7 @@ const HomeScreen = () => {
                 style={styles.categoryListContainerStyle}
             >
                 <ImageBackground
-                    source={categoryImage}
+                    source={item?.image ?? categoryImage}
                     style={styles.categoryImageBackgroundStyle}
                     imageStyle={{ borderRadius: 0 }} // Circular image
                     resizeMode="cover"
@@ -250,24 +249,23 @@ const HomeScreen = () => {
     function autoScroller() {
         const image = require('../../../assets/images/category/category_1.jpg');
         const posts = data.featurePosts;
+        // console.log('posts :>> ', posts[0]);
         if(loading) return <Text>Loading...</Text>
         if(!loading && posts.length <= 0) return <Text>No items</Text>
-        const renderItem = ({ item, index }) => (
+        const renderItem = ({ item, index }) => { 
+            // console.log('item :>> ',index, item.post_image);
+            return (
             <TouchableOpacity
                 onPress={() => navigation.push('postDetail/postDetailScreen', {
-                    image: image,
-                    id: item.ID,
-                    courseName: item.post_title,
-                    content: item.post_content,
-                    courseCategory: JSON.parse(item.categories).length > 0 ? JSON.parse(item.categories)[0] : "",
-                    courseRating: '5.0',
-                    courseNumberOfRating: '667',
-                    coursePrice: '567',
+                    id: item.ID
                 })}
                 activeOpacity={0.9}
             >
                 <ImageBackground
-                    source={image}
+                    // source={item?.post_image?.length > 10  ? item.post_image : image }
+                    source={{ uri: item?.post_image?.length > 10  ? item.post_image : image }}
+                    // source={{ uri: 'https://smartincome.tips/wp-content/uploads/2024/08/image-21.webp' }}
+                    fallbackUrl={Image}
                     style={{
                         width: itemWidth - 6,
                         height: 200,
@@ -278,15 +276,15 @@ const HomeScreen = () => {
                     borderRadius={Sizes.fixPadding - 5.0}
                 >
                     <Text numberOfLines={2} style={{ ...Fonts.white25Bold }}>
-                        {item.post_title.replace(/<\/?[^>]+(>|$)|&#\d+;/g, '')}
+                        {item.post_title?.replace(/<\/?[^>]+(>|$)|&#\d+;/g, '')}
                     </Text>
                         {/* <HtmlContentRenderer htmlContent={item.excerpt} /> */}
                     <Text numberOfLines={3} style={{ ...Fonts.white15Regular, textAlign: 'center', marginTop: 4 }}>
-                        {item.excerpt.replace(/<\/?[^>]+(>|$)|&#\d+;/g, '')}
+                        {item.post_content?.replace(/<\/?[^>]+(>|$)|&#\d+;/g, '')}
                     </Text>
                 </ImageBackground>
             </TouchableOpacity>
-        )
+        )}
 
         return (
             <Carousel
@@ -326,7 +324,7 @@ const HomeScreen = () => {
                 activeOpacity={0.9}
                 style={styles.popularCoursesContainerStyle}>
                 <Image
-                    source={image}
+                    source={item?.post_image ?? image}
                     resizeMode="cover"
                     style={styles.popularCoursesImageStyle}
                 />
@@ -377,14 +375,7 @@ const HomeScreen = () => {
         const renderItem = ({ item, index }) => (
             <TouchableOpacity
                 onPress={() => navigation.push('postDetail/postDetailScreen', {
-                    image: image,
-                    id: item.ID,
-                    courseName: item.post_title,
-                    content: item.post_content,
-                    courseCategory: JSON.parse(item.categories).length > 0 ? JSON.parse(item.categories)[0] : "",
-                    courseRating: '5.0',
-                    courseNumberOfRating: '667',
-                    coursePrice: '567',
+                    id: item.ID
                 })}
                 activeOpacity={0.9}
                 style={[
@@ -397,7 +388,7 @@ const HomeScreen = () => {
                 ]}
             >
                 <Image
-                    source={image}
+                    source={item?.post_image ?? image}
                     resizeMode="cover"
                     style={styles.popularTipsImageStyle}
                 />
@@ -454,7 +445,7 @@ const HomeScreen = () => {
                 )}
                 style={styles.popularCoursesContainerStyle}>
                 <Image
-                    source={image}
+                    source={item?.post_image ?? image}
                     resizeMode="cover"
                     style={styles.popularCoursesImageStyle}
                 />
@@ -715,7 +706,7 @@ const styles = StyleSheet.create({
         marginHorizontal: Sizes.fixPadding,
     },
     categoryBlurContainerStyle: {
-        backgroundColor: "rgba(0, 0, 0, 0.50)",
+        // backgroundColor: "rgba(0, 0, 0, 0.50)",
         width: 140.0,
         height: 140.0,
         borderRadius: 70.0,

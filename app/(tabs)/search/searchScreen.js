@@ -12,7 +12,7 @@ import { useLocalSearchParams, useNavigation } from "expo-router";
 
 const SearchScreen = () => {
     const [listData, setListData] = useState([]);
-    // const [data, setData] = useState([]);
+    const [choose, setChoose] = useState({profession: null, interest: null, skills: null});
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(true);
     const navigation = useNavigation();
@@ -58,7 +58,7 @@ const SearchScreen = () => {
                 element={
                     <View style={styles.textInputContainerStyle}>
                        
-                        <FindMyIncomeTips/>
+                        <FindMyIncomeTips onChange={data=>setChoose(data)}/>
                     </View>
                 }
                 toolbarColor={Colors.primaryColor}
@@ -85,7 +85,7 @@ const SearchScreen = () => {
 
     function popularTag({ search }) {
         return (
-            <View style={{ marginTop: Sizes.fixPadding + 3.0 }}>
+            <View key={search} style={{ marginTop: Sizes.fixPadding + 3.0 }}>
                 <Text style={{ ...Fonts.gray19Regular }}>{search}</Text>
                 <View style={{ backgroundColor: 'gray', height: 0.3, marginTop: Sizes.fixPadding }}></View>
             </View>

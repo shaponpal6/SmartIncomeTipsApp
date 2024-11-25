@@ -41,7 +41,7 @@ export async function getConfigs(db: SQLiteDatabase) {
 }
 
 export async function getCategories(db: SQLiteDatabase) {
-  const categoriesQuery = `SELECT * FROM ${TABLE_PREFIX}categories;`;
+  const categoriesQuery = `SELECT * FROM ${TABLE_PREFIX}taxonomies WHERE type='category' ;`;
   const categories = await db.getAllAsync(categoriesQuery);
   return categories;
 }

@@ -15,6 +15,7 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
   if (currentDbVersion !== 0) {
     // Drop existing tables
     // await db.execAsync(`DROP TABLE IF EXISTS ${TABLE_PREFIX}posts`);
+    // await db.execAsync(`DROP TABLE IF EXISTS ${TABLE_PREFIX}taxonomies`);
     // await db.execAsync(`DROP TABLE IF EXISTS ${TABLE_PREFIX}tags`);
     // await db.execAsync(`DROP TABLE IF EXISTS ${TABLE_PREFIX}categories`);
     // await db.execAsync(`DROP TABLE IF EXISTS ${TABLE_PREFIX}configs`);
@@ -28,10 +29,9 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
         post_content TEXT,
         post_title TEXT,
         post_status TEXT,
-        comment_status TEXT,
-        ping_status TEXT,
-        post_name TEXT,
-        post_modified TEXT,
+        post_image TEXT,
+        sort TEXT,
+        is_feature BOOLEAN,
         post_type TEXT,
         excerpt TEXT,
         categories TEXT,
@@ -48,7 +48,7 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
         image TEXT,
         count INTEGER,
         slug TEXT,
-        desc TEXT
+        description TEXT
       );
 
       CREATE TABLE IF NOT EXISTS ${TABLE_PREFIX}categories (
