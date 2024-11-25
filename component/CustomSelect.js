@@ -27,15 +27,18 @@ const CustomSelect = ({ selectedValue, onValueChange, options, title="" }) => {
             >
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContent}>
+                        <Text>Change Your Selected Choose: {selectedValue}</Text>
                         <Picker
                             selectedValue={selectedValue}
                             onValueChange={(itemValue) => {
-                                onValueChange(itemValue);
+                                const selectedOption = options.find((option) => option.name === itemValue);
+                                onValueChange(selectedOption); 
+                                // onValueChange(itemValue);
                                 setModalVisible(false);
                             }}
                         >
                             {options.map((option) => (
-                                <Picker.Item key={option.value} label={option.label} value={option.value} />
+                                <Picker.Item key={option.name} label={option.name} value={option.name} />
                             ))}
                         </Picker>
                         <TouchableOpacity

@@ -9,6 +9,7 @@ import {
   searchPosts as fetchSearchPosts,
   homePageData as fetchHomePageData,
   isDataEmpty as fetchIsDataEmpty,
+  getUserChoose as _getUserChoose,
   type SearchPostsArgs
 } from './dataService';
 import {type insertDataWithTransactionType} from './types'
@@ -24,6 +25,7 @@ interface SQLiteDatabaseContextType {
   homePageData: () => Promise<unknown>;
   isDataEmpty: () => Promise<unknown>;
   migrateDB: () => Promise<unknown>;
+  getUserChoose: () => Promise<unknown>;
 }
 
 const SQLiteDatabaseContext = createContext<SQLiteDatabaseContextType | undefined>(undefined);
@@ -56,6 +58,7 @@ const DatabaseInitializer = ({ children }: { children: ReactNode }) => {
   const homePageData = () => fetchHomePageData(db);
   const isDataEmpty = () => fetchIsDataEmpty(db);
   const migrateDB = () => migrateDbIfNeeded(db);
+  const getUserChoose = () => _getUserChoose(db);
 
   return (
     <SQLiteDatabaseContext.Provider
@@ -63,6 +66,7 @@ const DatabaseInitializer = ({ children }: { children: ReactNode }) => {
         db,
         insertDataWithTransaction,
         getPostById,
+        getUserChoose,
         getCategories,
         getTags,
         searchPosts,

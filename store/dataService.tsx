@@ -1,5 +1,6 @@
 import { useSQLiteContext, type SQLiteDatabase } from 'expo-sqlite';
-import {migrateDbIfNeeded} from './database'
+import { migrateDbIfNeeded } from './database'
+import { Tag } from './types';
 
 const TABLE_PREFIX = 'wp_';
 
@@ -45,6 +46,38 @@ export async function getCategories(db: SQLiteDatabase) {
   const categories = await db.getAllAsync(categoriesQuery);
   return categories;
 }
+
+export async function getUserChoose(db: SQLiteDatabase) {
+  const query = `SELECT * FROM ${TABLE_PREFIX}taxonomies WHERE type IN ('profession', 'interests', 'skills');`;
+
+  // Fetch all matching records
+  const results: Tag[] = await db.getAllAsync(query);
+
+  // Organize the results by type
+  const organizedData: {
+    profession: Tag[];
+    interests: Tag[];
+    skills: Tag[];
+  } = {
+    profession: [],
+    interests: [],
+    skills: []
+  };
+
+  // Group the results by type
+  results.forEach((item: Tag) => {
+    if (
+      item.type === 'profession' ||
+      item.type === 'interests' ||
+      item.type === 'skills'
+    ) {
+      organizedData[item.type].push(item); // TypeScript now knows item.type is a key of organizedData
+    }
+  });
+
+  return organizedData;
+}
+
 
 export async function searchPosts(
   db: SQLiteDatabase,
@@ -144,7 +177,7 @@ export async function isDataEmpty(db: SQLiteDatabase) {
     // Add a null check for tableCheck
     if (!tableCheck || tableCheck.count === 0) {
       console.log(`Table ${TABLE_PREFIX}posts does not exist. Creating it now...`);
-      
+
       // Create the table if it does not exist
       // await db.executeAsync(`
       //   CREATE TABLE IF NOT EXISTS ${TABLE_PREFIX}posts (

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Alert, TouchableOpacity, Animated } from 'react-native';
 import CustomButton from './Button';
 import CustomSelect from './CustomSelect';
 import { Ionicons } from '@expo/vector-icons';
+import { useDatabase } from '../store/SQLiteDatabaseContext';
 
 // Utility function to generate a random ID
 const generateRandomId = () => Math.floor(Math.random() * 1000);
@@ -14,6 +15,34 @@ const FindMyIncomeTips = ({onChange=null}) => {
     const [showInterest, setShowInterest] = useState(false);
     const [showSkills, setShowSkills] = useState(false);
     const [fadeAnim] = useState(new Animated.Value(0));
+    const { getUserChoose } = useDatabase();
+
+    const [data, setData] = useState({posts:[], tags:[], configs: [{key: 'site_title', value: 'Smart Income Tips'}], categories:[], courses: [], featurePosts: [], topPosts: [], newPosts: [], otherPosts: []});
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        let isMounted = true;
+        async function loadData() {
+          if (isMounted) {
+            setLoading(true);
+            try {
+              const fetchedData = await getUserChoose();
+              setData(fetchedData);
+            } catch (error) {
+              console.error('Error loading data:', error);
+            } finally {
+              setLoading(false);
+            }
+          }
+        }
+        loadData();
+        return () => {
+          isMounted = false;
+        };
+      }, []);
+
+    //   console.log('data :>> ', data);
+
 
     const handleReset = () => {
         setStep(1);
@@ -34,19 +63,21 @@ const FindMyIncomeTips = ({onChange=null}) => {
         // );
     };
 
-    const professionOptions = [
+    const professionOptions = !loading ? data.profession :
+    [
         { label: 'Developer', value: 'Developer', term_id: generateRandomId() },
         { label: 'Designer', value: 'Designer', term_id: generateRandomId() },
         { label: 'Marketer', value: 'Marketer', term_id: generateRandomId() },
     ];
+    console.log('professionOptions :>> ', professionOptions);
 
-    const interestOptions = [
+    const interestOptions = !loading ? data.interests :[
         { label: 'Technology', value: 'Technology', term_id: generateRandomId() },
         { label: 'Art', value: 'Art', term_id: generateRandomId() },
         { label: 'Marketing', value: 'Marketing', term_id: generateRandomId() },
     ];
 
-    const skillsOptions = [
+    const skillsOptions = !loading ? data.skills :[
         { label: 'JavaScript', value: 'JavaScript', term_id: generateRandomId() },
         { label: 'UI/UX Design', value: 'UI/UX Design', term_id: generateRandomId() },
         { label: 'SEO', value: 'SEO', term_id: generateRandomId() },
@@ -77,12 +108,12 @@ const FindMyIncomeTips = ({onChange=null}) => {
                                 key={option.term_id}
                                 style={styles.option}
                                 onPress={() => {
-                                    setSelectedProfession(option.value);
+                                    setSelectedProfession(option);
                                     setStep(2);
                                     setShowInterest(true);
                                 }}
                             >
-                                <Text style={styles.optionText}>{option.label}</Text>
+                                <Text style={styles.optionText}>{option.name}</Text>
                             </TouchableOpacity>
                         ))}
                     </View>
@@ -91,7 +122,7 @@ const FindMyIncomeTips = ({onChange=null}) => {
                 {selectedProfession && (
                     <CustomSelect
                         title="My Profession is:"
-                        selectedValue={selectedProfession}
+                        selectedValue={selectedProfession.name}
                         onValueChange={(itemValue) => setSelectedProfession(itemValue)}
                         options={professionOptions}
                     />
@@ -104,17 +135,17 @@ const FindMyIncomeTips = ({onChange=null}) => {
                             <>
                         <Text style={styles.label}>and my interest in:</Text>
                             <View style={styles.optionsContainer}>
-                                {interestOptions.map((option) => (
+                                {interestOptions && interestOptions.length && interestOptions.map((option) => (
                                     <TouchableOpacity
                                         key={option.term_id}
                                         style={styles.option}
                                         onPress={() => {
-                                            setSelectedInterest(option.value);
+                                            setSelectedInterest(option);
                                             setStep(3);
                                             setShowSkills(true);
                                         }}
                                     >
-                                        <Text style={styles.optionText}>{option.label}</Text>
+                                        <Text style={styles.optionText}>{option.name}</Text>
                                     </TouchableOpacity>
                                 ))}
                             </View>
@@ -123,7 +154,7 @@ const FindMyIncomeTips = ({onChange=null}) => {
                         {selectedInterest && (
                             <CustomSelect
                                 title="and my interest in:"
-                                selectedValue={selectedInterest}
+                                selectedValue={selectedInterest.name}
                                 onValueChange={(itemValue) => setSelectedInterest(itemValue)}
                                 options={interestOptions}
                             />
@@ -141,9 +172,9 @@ const FindMyIncomeTips = ({onChange=null}) => {
                                     <TouchableOpacity
                                         key={option.term_id}
                                         style={styles.option}
-                                        onPress={() => setSelectedSkills(option.value)}
+                                        onPress={() => setSelectedSkills(option)}
                                     >
-                                        <Text style={styles.optionText}>{option.label}</Text>
+                                        <Text style={styles.optionText}>{option.name}</Text>
                                     </TouchableOpacity>
                                 ))}
                             </View>
@@ -152,7 +183,7 @@ const FindMyIncomeTips = ({onChange=null}) => {
                         {selectedSkills && (
                             <CustomSelect
                                 title="and my skills in:"
-                                selectedValue={selectedSkills}
+                                selectedValue={selectedSkills.name}
                                 onValueChange={(itemValue) => setSelectedSkills(itemValue)}
                                 options={skillsOptions}
                             />

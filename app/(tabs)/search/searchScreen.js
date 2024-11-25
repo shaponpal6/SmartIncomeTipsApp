@@ -7,6 +7,7 @@ import FindMyIncomeTips from "../../../component/FindMyIncomeTips";
 import Logo from "../../../component/Logo";
 import TopMenu from "../../../component/TopMenu";
 import Button from "../../../component/Button";
+import PostList from "../../../component/PostList";
 import { useDatabase } from '../../../store/SQLiteDatabaseContext';
 import { useLocalSearchParams, useNavigation } from "expo-router";
 
@@ -14,6 +15,7 @@ const SearchScreen = () => {
     const [listData, setListData] = useState([]);
     const [choose, setChoose] = useState({profession: null, interest: null, skills: null});
     const [page, setPage] = useState(1);
+    const [query, setQuery] = useState({ search: '', page: 1, limit: 20, postType: 'post'});
     const [loading, setLoading] = useState(true);
     const navigation = useNavigation();
     const { insertDataWithTransaction, getPostById, getCategories, getTags, searchPosts, homePageData } = useDatabase();
@@ -25,11 +27,12 @@ const SearchScreen = () => {
     const updateState = (data) => setState((state) => ({ ...state, ...data }))
 
     const { isTextFieldFocus } = state;
+    console.log('choose :>> ', choose);
 
-    async function loadData({search="", page=1, limit= 10}) {
+    async function loadData() {
         // console.log('id :>> ', id);
         try{
-            const data = await searchPosts({ search: search, page: page, limit: limit, postType: 'post'});
+            const data = await searchPosts(query);
             // setData(data);
             setListData(data);
             setLoading(false);
@@ -40,8 +43,12 @@ const SearchScreen = () => {
     }
 
     useEffect(() => {
-        loadData({});
-    }, []);
+        loadData();
+    }, [query]);
+    
+    useEffect(() => {
+        setQuery({...query});
+    }, [choose]);
 
     const getMoreIdeas = () => {
         loadData({page: page+1})
@@ -66,6 +73,7 @@ const SearchScreen = () => {
                 toolbarMaxHeight={380}
                 src={require('../../../assets/images/appbar_bg.png')}
             >
+                <PostList posts={listData} />
                 <View style={{
                     paddingBottom: Sizes.fixPadding * 7.0, paddingTop: Sizes.fixPadding * 4.0,
                     paddingHorizontal: Sizes.fixPadding * 2.0
