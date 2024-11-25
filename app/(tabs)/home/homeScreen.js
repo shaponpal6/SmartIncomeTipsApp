@@ -22,6 +22,7 @@ import Button from "../../../component/Button";
 import FindMyIncomeTips from "../../../component/FindMyIncomeTips";
 import HtmlContentRenderer from '../../../component/HtmlContentRenderer';
 import Image from '../../../component/LazyImage';
+import Loading from '../../../component/Loading';
 import ImageBackground from '../../../component/LazyImageBackground';
 // import Roadmap from '../../../component/Roadmap';
 // import {fetchAndStoreData} from "../../../store/dataStoreService";
@@ -101,6 +102,9 @@ const HomeScreen = () => {
     }, [navigation]);
     const site_title = data.configs.find(config => config.key === 'site_title') || {value: "Smart Income Tips"};
     const categoryImage = require('../../../assets/images/bg.jpg');
+    if(loading) {
+        return <Loading/>
+    }
     return (
         <View style={{ flex: 1, }}>
             <ImageBackgroundRoot source={categoryImage} style={{flex: 1}} imageStyle={{}}>
@@ -161,7 +165,7 @@ const HomeScreen = () => {
         const categories = data.categories;
         if(loading) return <Text>Loading...</Text>
         if(!loading && categories.length <= 0) return <Text>No Category</Text>
-        console.log('categories :>> ', categories[2]);
+        // console.log('categories :>> ', categories[2]);
         const renderItem = ({ item }) => (
             <TouchableOpacity
                 activeOpacity={0.9}

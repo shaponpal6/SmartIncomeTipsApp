@@ -7,6 +7,7 @@ import { useNavigation } from "expo-router";
 import Roadmap from "../../../component/Roadmap";
 import Logo from "../../../component/Logo";
 import TopMenu from "../../../component/TopMenu";
+import Loading from '../../../component/Loading';
 
 const { width } = Dimensions.get('screen');
 

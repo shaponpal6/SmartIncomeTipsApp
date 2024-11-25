@@ -8,6 +8,8 @@ import Logo from "../../../component/Logo";
 import TopMenu from "../../../component/TopMenu";
 import Button from "../../../component/Button";
 import PostList from "../../../component/PostList";
+import Loading from '../../../component/Loading';
+import ListItemsComponent from "../../../component/ListItemsComponent";
 import { useDatabase } from '../../../store/SQLiteDatabaseContext';
 import { useLocalSearchParams, useNavigation } from "expo-router";
 
@@ -27,10 +29,8 @@ const SearchScreen = () => {
     const updateState = (data) => setState((state) => ({ ...state, ...data }))
 
     const { isTextFieldFocus } = state;
-    console.log('choose :>> ', choose);
 
     async function loadData() {
-        // console.log('id :>> ', id);
         try{
             const data = await searchPosts(query);
             // setData(data);
@@ -47,12 +47,23 @@ const SearchScreen = () => {
     }, [query]);
     
     useEffect(() => {
-        setQuery({...query});
+        const prepareChoose = (input) => {
+            return {
+              profession: input.profession?.term_id ? [input.profession.term_id] : [],
+              interest: input.interest?.term_id ? [input.interest.term_id] : [],
+              skills: input.skills?.term_id ? [input.skills.term_id] : []
+            };
+          };
+        setQuery({...query, ...prepareChoose(choose)});
     }, [choose]);
 
     const getMoreIdeas = () => {
         loadData({page: page+1})
         setPage(page+1)
+    }
+
+    if(loading) {
+        return <Loading/>
     }
 
     return (
@@ -74,39 +85,14 @@ const SearchScreen = () => {
                 src={require('../../../assets/images/appbar_bg.png')}
             >
                 <PostList posts={listData} />
-                <View style={{
-                    paddingBottom: Sizes.fixPadding * 7.0, paddingTop: Sizes.fixPadding * 4.0,
-                    paddingHorizontal: Sizes.fixPadding * 2.0
-                }}>
-                    {popularTagsTitle()}
-                    {listData.map((item) => popularTag({ search: item.post_title.replace(/<\/?[^>]+(>|$)|&#\d+;/g, '') }))}
-                    {/* {popularTag({ search: 'Business & Management' })} */}
-                    <View style={{width: '100%', height:20}}/>
-                    <Button
-                        title="Get More Income Ideas"
-                        onPress={getMoreIdeas}
-                    />
-                </View>
+                {/* <ListItemsComponent title="Hello List" posts={listData} /> */}
+                <Button
+                    title="Get More Income Ideas"
+                    onPress={getMoreIdeas}
+                />
             </CollapsingToolbar>
         </View>
     )
-
-    function popularTag({ search }) {
-        return (
-            <View key={search} style={{ marginTop: Sizes.fixPadding + 3.0 }}>
-                <Text style={{ ...Fonts.gray19Regular }}>{search}</Text>
-                <View style={{ backgroundColor: 'gray', height: 0.3, marginTop: Sizes.fixPadding }}></View>
-            </View>
-        )
-    }
-
-    function popularTagsTitle() {
-        return (
-            <Text style={{ ...Fonts.black25Bold }}>
-                Popular Ideas
-            </Text>
-        )
-    }
 }
 
 const styles = StyleSheet.create({

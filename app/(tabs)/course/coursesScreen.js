@@ -14,6 +14,7 @@ import Logo from "../../../component/Logo";
 import TopMenu from "../../../component/TopMenu";
 import Image from "../../../component/LazyImage";
 import PostList from "../../../component/PostList";
+import Loading from '../../../component/Loading';
 
 import { useDatabase } from "../../../store/SQLiteDatabaseContext";
 
@@ -56,6 +57,9 @@ const CoursesScreen = () => {
         loadData("");
     }, []);
 
+    if(loading) {
+        return <Loading/>
+    }
     return (
         <View style={{ flex: 1, backgroundColor: "#FAFAFA" }}>
             <CollapsingToolbar

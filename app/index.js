@@ -56,13 +56,13 @@ const SplashScreen = () => {
     }, [loading, navigation]);
 
     return (
-        <View style={{ flex: 1, backgroundColor: Colors.primaryColor }}>
+        <View style={{ flex: 1, backgroundColor: '#001c30' }}>
             <MyStatusBar />
             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
                 <Text style={{ ...Fonts.white60Regular }}>
                     Welcome
                 </Text>
-                <Text>{loading ? 'Fetching Live Data ...' : ''}</Text>
+                <Text style={{ color: '#FFF' }}>{loading ? 'Preparing App ...' : ''}</Text>
             </View>
         </View>
     );

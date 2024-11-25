@@ -17,6 +17,7 @@ import { useDatabase } from '../../../store/SQLiteDatabaseContext';
 import Logo from "../../../component/Logo";
 import TopMenu from "../../../component/TopMenu";
 import Image from '../../../component/LazyImage';
+import Loading from '../../../component/Loading';
 
 const { width } = Dimensions.get('window');
 const image = require("../../../assets/images/new_course/new_course_2.png");
@@ -130,6 +131,9 @@ const WishListScreen = () => {
         )
     }
 
+    if(loading) {
+        return <Loading/>
+    }
     return (
         <View style={{ flex: 1, backgroundColor: '#FAFAFA' }}>
             <CollapsingToolbar
