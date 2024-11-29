@@ -4,13 +4,16 @@
 export async function updateData() {
     // const { insertDataWithTransaction } = useDatabase();
   try {
-    const [postsResponse, taxonomiesResponse, configResponse] = await Promise.all([
-      fetch('https://smartincome.tips/wp-json/sit/v2/posts'),
+    const [postsResponse] = await Promise.all([
+      fetch('https://smartincome.tips/wp-json/sit/v2/posts')
+    ]);
+    const [taxonomiesResponse, configResponse] = await Promise.all([
       fetch('https://smartincome.tips/wp-json/sit/v2/taxonomies'),
       fetch('https://smartincome.tips/wp-json/sit/v2/configs')
     ]);
 
     const posts = await postsResponse.json();
+    // console.log('posts :>> ', posts);
     const categories = await taxonomiesResponse.json();
     const configs = await configResponse.json();
     const courses = posts;

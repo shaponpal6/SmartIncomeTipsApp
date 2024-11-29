@@ -87,7 +87,7 @@ const HomeScreen = () => {
 
     useEffect(() => {
         const unsubscribe = navigation.addListener('focus', () => {
-            flatListRef.current.startAutoplay((instantly = false));
+            if(flatListRef && flatListRef?.current) flatListRef.current.startAutoplay((instantly = false));
         });
         return unsubscribe;
         
@@ -96,7 +96,7 @@ const HomeScreen = () => {
 
     useEffect(() => {
         const unsubscribe = navigation.addListener('blur', () => {
-            flatListRef.current.stopAutoplay();
+            if(flatListRef && flatListRef?.current) flatListRef.current.stopAutoplay();
         });
         return unsubscribe;
     }, [navigation]);

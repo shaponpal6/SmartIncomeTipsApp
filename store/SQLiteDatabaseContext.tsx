@@ -10,6 +10,11 @@ import {
   homePageData as fetchHomePageData,
   isDataEmpty as fetchIsDataEmpty,
   getUserChoose as _getUserChoose,
+  getRoadmap as _getRoadmap,
+  getRoadmapTask as _getRoadmapTask,
+  addRoadmap as _addRoadmap,
+  updateRoadmap as _updateRoadmap,
+  deleteRoadmapTask as _deleteRoadmapTask,
   type SearchPostsArgs
 } from './dataService';
 import {type insertDataWithTransactionType} from './types'
@@ -26,6 +31,12 @@ interface SQLiteDatabaseContextType {
   isDataEmpty: () => Promise<unknown>;
   migrateDB: () => Promise<unknown>;
   getUserChoose: () => Promise<unknown>;
+  getRoadmap: (pid: number) => Promise<unknown>;
+  addRoadmap: (data: object) => Promise<unknown>;
+  getRoadmapTask: (id: number) => Promise<unknown>;
+  updateRoadmap: (data: object) => Promise<unknown>;
+  deleteRoadmapTask: (id: number) => Promise<unknown>;
+  // deleteRoadmap: () => Promise<unknown>;
 }
 
 const SQLiteDatabaseContext = createContext<SQLiteDatabaseContextType | undefined>(undefined);
@@ -59,6 +70,11 @@ const DatabaseInitializer = ({ children }: { children: ReactNode }) => {
   const isDataEmpty = () => fetchIsDataEmpty(db);
   const migrateDB = () => migrateDbIfNeeded(db);
   const getUserChoose = () => _getUserChoose(db);
+  const getRoadmap = (pid:number) => _getRoadmap(db, pid);
+  const getRoadmapTask = (id:number) => _getRoadmapTask(db, id);
+  const addRoadmap = (data:object) => _addRoadmap(db, data);
+  const updateRoadmap = (data:object) => _updateRoadmap(db, data);
+  const deleteRoadmapTask = (id:number) => _deleteRoadmapTask(db, id);
 
   return (
     <SQLiteDatabaseContext.Provider
@@ -72,7 +88,12 @@ const DatabaseInitializer = ({ children }: { children: ReactNode }) => {
         searchPosts,
         homePageData,
         isDataEmpty,
-        migrateDB
+        migrateDB,
+        getRoadmap,
+        addRoadmap,
+        getRoadmapTask,
+        updateRoadmap,
+        deleteRoadmapTask
       }}
     >
       {children}

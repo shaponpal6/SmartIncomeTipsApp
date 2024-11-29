@@ -51,6 +51,19 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
         description TEXT
       );
 
+      CREATE TABLE IF NOT EXISTS ${TABLE_PREFIX}roadmap (
+          id TEXT PRIMARY KEY NOT NULL,
+          uid INTEGER NOT NULL,
+          pid INTEGER NOT NULL,
+          parent INTEGER DEFAULT 0,
+          title TEXT NOT NULL,
+          desc TEXT,
+          progress TEXT DEFAULT '0%',
+          status INTEGER DEFAULT 1,
+          input INTEGER DEFAULT 0,
+          answer TEXT
+      );
+
       CREATE TABLE IF NOT EXISTS ${TABLE_PREFIX}categories (
         term_id INTEGER PRIMARY KEY,
         name TEXT,

@@ -1,6 +1,7 @@
 import { useSQLiteContext, type SQLiteDatabase } from 'expo-sqlite';
 import { migrateDbIfNeeded } from './database'
 import { Tag } from './types';
+import {  Roadmap } from '../types';
 
 const TABLE_PREFIX = 'wp_';
 
@@ -340,3 +341,66 @@ export async function searchPosts(
   return posts;
 }
 
+
+
+
+
+
+
+
+
+
+
+export async function getRoadmap(db: SQLiteDatabase, pid: number): Promise<Roadmap[]> {
+  const query = `SELECT * FROM ${TABLE_PREFIX}roadmap WHERE pid = ?`;
+  const result = await db.getAllAsync(query, [pid]);
+  return result as Roadmap[];
+}
+
+export async function getRoadmapTask(db: SQLiteDatabase, id: number): Promise<Roadmap | undefined> {
+  const query = `SELECT * FROM ${TABLE_PREFIX}roadmap WHERE id = ?`;
+  const result = await db.getAllAsync(query, [id]);
+  return (result.length > 0 ? result[0] : undefined) as Roadmap;
+}
+
+export async function addRoadmap(db: SQLiteDatabase, data: Roadmap): Promise<void> {
+  const query = `
+    INSERT INTO ${TABLE_PREFIX}roadmap 
+    (id, uid, pid, parent, title, desc, progress, status, input, answer)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+  `;
+  await db.getAllAsync(query, [
+    data.id,
+    data.uid,
+    data.pid,
+    data.parent,
+    data.title,
+    data.desc,
+    data.progress ?? '0%',
+    data.status ?? 1,
+    data.input ?? 0,
+    data.answer ?? '',
+  ]);
+}
+
+export async function updateRoadmap(db: SQLiteDatabase, data: Roadmap): Promise<void> {
+  const query = `
+    UPDATE ${TABLE_PREFIX}roadmap
+    SET title = ?, desc = ?, progress = ?, status = ?, input = ?, answer = ?
+    WHERE id = ?;
+  `;
+  await db.getAllAsync(query, [
+    data.title,
+    data.desc,
+    data.progress,
+    data.status,
+    data.input,
+    data.answer,
+    data.id,
+  ]);
+}
+
+export async function deleteRoadmapTask(db: SQLiteDatabase, id: string): Promise<void> {
+  const query = `DELETE FROM ${TABLE_PREFIX}roadmap WHERE id = ?`;
+  await db.getAllAsync(query, [id]);
+}
