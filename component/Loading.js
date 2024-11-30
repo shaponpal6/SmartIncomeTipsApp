@@ -2,6 +2,7 @@ import React from "react";
 import { Text, View, StyleSheet } from "react-native";
 import { Fonts, Colors } from "../constant/styles";
 import MyStatusBar from "./myStatusBar";
+import { ActivityIndicator, MD2Colors } from 'react-native-paper';
 
 const Loading = () => {
     return (
@@ -12,6 +13,7 @@ const Loading = () => {
                     Welcome
                 </Text>
                 <Text style={{ color: '#FFF' }}>Preparing App ...</Text>
+                <ActivityIndicator animating={true} color={MD2Colors.white60Regular} size="large"/>
             </View>
         </View>
     )

@@ -23,6 +23,8 @@ import FindMyIncomeTips from "../../../component/FindMyIncomeTips";
 import HtmlContentRenderer from '../../../component/HtmlContentRenderer';
 import Image from '../../../component/LazyImage';
 import Loading from '../../../component/Loading';
+import PostGrid from '../../../component/PostGrid';
+import CategoryGrid from '../../../component/CategoryGrid';
 import ImageBackground from '../../../component/LazyImageBackground';
 // import Roadmap from '../../../component/Roadmap';
 // import {fetchAndStoreData} from "../../../store/dataStoreService";
@@ -30,6 +32,7 @@ import DatabaseTest from "../../../store/DatabaseTest";
 // import { fetchAndStoreData } from '../../../store/services/dataService'
 // import {initializeDatabase} from "../../../store/database";
 import { useNavigation } from "expo-router";
+import { Chip } from 'react-native-paper';
 import { useDatabase } from '../../../store/SQLiteDatabaseContext';
 
 const width = Dimensions.get('window').width;
@@ -144,8 +147,13 @@ const HomeScreen = () => {
                     {/* <TagsComponent tags={data.categories} maxItemsToDisplay={20} /> */}
                     {/* {title({ title: 'Top Income Sectors' })}
                     {categoriesList()} */}
-                    {title({ title: 'Top Income Sectors' })}
-                    {categories()}
+                    {/* {title({ title: 'Top Income Sectors' })} */}
+                    <CategoryGrid title="Top Income Sectors" data={data.categories}/>
+                    <PostGrid title="Top Posts" data={data.posts} route="postDetail/postDetailScreen"/>
+                    <PostGrid title="Popular Courses" data={data.posts} route="courseDetail/courseDetailScreen"/>
+                    {/* <TagGrid title="Top Income Sectors" data={data.categories}/> */}
+                    {/* {title({ title: 'Top Income Sectors' })} */}
+                    {/* {categories()} */}
                     {title({ title: 'Popular Tips' })}
                     {popularPosts()}
                     {title({ title: 'Popular Courses' })}
