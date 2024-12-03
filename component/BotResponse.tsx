@@ -35,8 +35,16 @@ type AnswerData = {
   answer3?: Section | null;
   summery: string;
 };
-
-const BotResponse: React.FC = ({queryData}:any) => {
+type QueryData = {
+    search: string;
+    profession: number[];
+    interests: number[];
+    skills: number[];
+  };
+  interface BotResponseProps {
+    queryData: QueryData;
+  }
+const BotResponse: React.FC<BotResponseProps> = ({queryData}) => {
   const navigation = useNavigation();
   const [isAnalyzing, setIsAnalyzing] = useState(true);
   const [renderedText, setRenderedText] = useState<string[]>([]);
@@ -47,7 +55,7 @@ const BotResponse: React.FC = ({queryData}:any) => {
     console.log('queryData :>> ', queryData);
     setQuery({...query, ...queryData});
   }, [queryData])
-  
+
   const answer: AnswerData = {
     intro: 'Here is the answer.....',
     answer1: {
@@ -105,7 +113,7 @@ const BotResponse: React.FC = ({queryData}:any) => {
                 answer2: null, // Handles null gracefully
                 answer3: undefined, // Handles undefined gracefully
               });
-              console.log('dynamicData :>> ', dynamicData);
+            //   console.log('dynamicData :>> ', dynamicData);
             startTyping((dynamicData));
             setIsAnalyzing(false);
         }catch(err){
