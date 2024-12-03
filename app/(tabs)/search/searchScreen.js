@@ -75,13 +75,12 @@ const SearchScreen = () => {
             rightItem={<TopMenu/>}
                 element={
                     <View style={styles.textInputContainerStyle}>
-                       
                         <FindMyIncomeTips onChange={data=>setChoose(data)}/>
                     </View>
                 }
                 toolbarColor={Colors.primaryColor}
                 toolBarMinHeight={40}
-                toolbarMaxHeight={380}
+                toolbarMaxHeight={480}
                 src={require('../../../assets/images/appbar_bg.png')}
             >
                 <PostList posts={listData} />
@@ -100,7 +99,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'transparent',
         width: '100%',
         borderRadius: Sizes.fixPadding * 3.0,
-        paddingVertical: Sizes.fixPadding,
+        // paddingVertical: Sizes.fixPadding,
         justifyContent: 'center'
     }
 });

@@ -6,18 +6,18 @@ import {
     StyleSheet,
     TouchableOpacity,
     Dimensions,
+    // Image,
 } from "react-native";
+import Logo from "../../../component/Logo";
+import TopMenu from "../../../component/TopMenu";
+import Image from '../../../component/LazyImage';
 import { Colors, Fonts, Sizes, CommonStyles } from "../../../constant/styles";
 import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import CollapsingToolbar from "../../../component/sliverAppBar";
-import Search from "../../../component/Search";
 import { Snackbar } from 'react-native-paper';
 import { useDatabase } from '../../../store/SQLiteDatabaseContext';
-import Logo from "../../../component/Logo";
-import TopMenu from "../../../component/TopMenu";
-import Image from '../../../component/LazyImage';
-import Loading from '../../../component/Loading';
+import Button from '../../../component/Button';
 
 const { width } = Dimensions.get('window');
 const image = require("../../../assets/images/new_course/new_course_2.png");
@@ -40,19 +40,17 @@ const wishListData = [
 ];
 
 const WishListScreen = () => {
-    const [listData, setListData] = useState([]);
-    // const [data, setData] = useState([]);
+    const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const navigation = useNavigation();
-    const { insertDataWithTransaction, getPostById, getCategories, getTags, searchPosts, homePageData } = useDatabase();
+    const { getAllInterest, deleteFromInterest, searchPosts, homePageData } = useDatabase();
     // const { id, category } = useLocalSearchParams();
     
-    async function loadData(search="") {
+    async function loadData() {
         // console.log('id :>> ', id);
         try{
-            const data = await searchPosts({ search: search, page: 1, limit: 10, postType: 'post'});
-            // setData(data);
-            setListData(data);
+            const data = await getAllInterest();
+            setData(data);
             setLoading(false);
         }catch(err){
             setLoading(false);
@@ -62,11 +60,11 @@ const WishListScreen = () => {
 
     useEffect(() => {
         loadData();
-    }, []);
+    }, [Date.now()]);
 
     const [showSnackBar, setShowSnackBar] = useState(false);
 
-    
+    const [listData, setListData] = useState(wishListData);
 
     const rightButton = ({ key }) => (
         <SwipeButtonsContainer>
@@ -81,30 +79,18 @@ const WishListScreen = () => {
         </SwipeButtonsContainer >
     );
 
-    const deleteRow = ({ rowKey }) => {
-        const newData = [...listData];
-        const prevIndex = listData.findIndex(item => item.key === rowKey);
+    const deleteRow = async ({ rowKey }) => {
+        await deleteFromInterest(rowKey)
+        const newData = [...data];
+        const prevIndex = data.findIndex(item => item.ID === rowKey);
         newData.splice(prevIndex, 1);
-        setListData(newData);
+        setData(newData);
         setShowSnackBar(true);
+        loadData()
     };
 
-    function renderItem({ item, index }) {
+    function renderItem({ item }) {
         return (
-            <TouchableOpacity
-                onPress={() => navigation.push('postDetail/postDetailScreen', {
-                    image: image,
-                    id: item.ID,
-                    courseName: item.post_title,
-                    content: item.post_content,
-                    courseCategory: JSON.parse(item.categories).length > 0 ? JSON.parse(item.categories)[0] : "",
-                    courseRating: '5.0',
-                    courseNumberOfRating: '667',
-                    coursePrice: '567',
-                })}
-                activeOpacity={0.9}
-                key={item.ID} 
-            >
             <View key={item.ID}>
                 <SwipeItem
                     style={styles.button}
@@ -112,7 +98,7 @@ const WishListScreen = () => {
                 >
                     <View style={styles.wishlistContainerStyle}>
                         <Image
-                            source={item?.post_image !== "" ? item.post_image : image}
+                            source={item.post_image}
                             style={styles.wishlistImageStyle}
                             resizeMode="cover"
                         />
@@ -120,20 +106,23 @@ const WishListScreen = () => {
                             <Text style={{ ...Fonts.black17Bold }}>
                                 {item.post_title}
                             </Text>
-                            <Text numberOfLines={3} style={{ textAlign: 'left' }}>
-                                {item.post_content.replace(/<\/?[^>]+(>|$)|&#\d+;/g, '')}
+                            <Button title="Start Earning" onPress={() => navigation.push("courseDetail/courseDetailScreen", { id: item.ID })} style={{marginTop: 4}}/>
+                            {/* <Text style={{ ...Fonts.black17Bold, marginVertical: Sizes.fixPadding }}>
+                                ${item.amount}
                             </Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <Text style={{ ...Fonts.gray15Bold, marginRight: Sizes.fixPadding - 5.0 }}>
+                                    {item.rating}
+                                </Text>
+                                <MaterialIcons name="star" size={17} color="black" />
+                            </View> */}
                         </View>
                     </View>
                 </SwipeItem>
             </View>
-            </TouchableOpacity>
         )
     }
 
-    if(loading) {
-        return <Loading/>
-    }
     return (
         <View style={{ flex: 1, backgroundColor: '#FAFAFA' }}>
             <CollapsingToolbar
@@ -141,23 +130,15 @@ const WishListScreen = () => {
                 <Logo text={ "Smart Income Tips"}/>
             }
             rightItem={<TopMenu/>}
-                
                 element={
-                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-                    <Text style={{ ...Fonts.white60Regular, marginBottom: 30 }}>Income Ideas</Text>
-                    <Search
-                        placeholder="Type to search..."
-                        onChange={(text) => loadData(text)}
-                        onSubmit={(event) => loadData(event.nativeEvent.text)}
-                    />
-                    </View>
+                    <Text style={{ ...Fonts.black25Bold }}>My Interest</Text>
                 }
                 toolbarColor={Colors.primaryColor}
                 toolBarMinHeight={40}
-                toolbarMaxHeight={240}
+                toolbarMaxHeight={230}
                 src={require('../../../assets/images/appbar_bg.png')}
             >
-                {listData.length == 0 ?
+                {data.length == 0 ?
                     <View style={{
                         flex: 0.7,
                         justifyContent: 'center',
@@ -165,12 +146,12 @@ const WishListScreen = () => {
                     }}>
                         <FontAwesome5 name="heart-broken" size={50} color="gray" />
                         <Text style={{ ...Fonts.gray17Bold, marginTop: Sizes.fixPadding * 2.0 }}>
-                            No Items Found
+                            No Item in Interest
                         </Text>
                     </View>
                     :
                     <View style={styles.container} >
-                        {listData.map((item) => renderItem({ item }))}
+                        {data.map((item) => renderItem({ item }))}
                     </View>}
             </CollapsingToolbar>
             <Snackbar

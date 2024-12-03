@@ -15,9 +15,13 @@ import {
   addRoadmap as _addRoadmap,
   updateRoadmap as _updateRoadmap,
   deleteRoadmapTask as _deleteRoadmapTask,
+  addToInterest as _addToInterest,
+  deleteFromInterest as _deleteFromInterest,
+  getAllInterest as _getAllInterest,
   type SearchPostsArgs
 } from './dataService';
 import {type insertDataWithTransactionType} from './types'
+import { Interest} from '../types'
 
 // Create a context for sharing database access
 interface SQLiteDatabaseContextType {
@@ -35,7 +39,10 @@ interface SQLiteDatabaseContextType {
   addRoadmap: (data: object) => Promise<unknown>;
   getRoadmapTask: (id: number) => Promise<unknown>;
   updateRoadmap: (data: object) => Promise<unknown>;
-  deleteRoadmapTask: (id: number) => Promise<unknown>;
+  deleteRoadmapTask: (id: string) => Promise<unknown>;
+  addToInterest: (data: Interest) => Promise<unknown>;
+  deleteFromInterest: (id: string) => Promise<unknown>;
+  getAllInterest: () => Promise<unknown>;
   // deleteRoadmap: () => Promise<unknown>;
 }
 
@@ -74,7 +81,10 @@ const DatabaseInitializer = ({ children }: { children: ReactNode }) => {
   const getRoadmapTask = (id:number) => _getRoadmapTask(db, id);
   const addRoadmap = (data:object) => _addRoadmap(db, data);
   const updateRoadmap = (data:object) => _updateRoadmap(db, data);
-  const deleteRoadmapTask = (id:number) => _deleteRoadmapTask(db, id);
+  const deleteRoadmapTask = (id:string) => _deleteRoadmapTask(db, id);
+  const addToInterest = (data:Interest) => _addToInterest(db, data);
+  const deleteFromInterest = (id:string) => _deleteFromInterest(db, id);
+  const getAllInterest = () => _getAllInterest(db);
 
   return (
     <SQLiteDatabaseContext.Provider
@@ -93,7 +103,10 @@ const DatabaseInitializer = ({ children }: { children: ReactNode }) => {
         addRoadmap,
         getRoadmapTask,
         updateRoadmap,
-        deleteRoadmapTask
+        deleteRoadmapTask,
+        addToInterest,
+        deleteFromInterest,
+        getAllInterest
       }}
     >
       {children}

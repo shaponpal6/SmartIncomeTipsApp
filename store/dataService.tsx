@@ -1,7 +1,7 @@
 import { useSQLiteContext, type SQLiteDatabase } from 'expo-sqlite';
 import { migrateDbIfNeeded } from './database'
 import { Tag } from './types';
-import {  Roadmap } from '../types';
+import {  Roadmap, Interest } from '../types';
 
 const TABLE_PREFIX = 'wp_';
 
@@ -404,3 +404,80 @@ export async function deleteRoadmapTask(db: SQLiteDatabase, id: string): Promise
   const query = `DELETE FROM ${TABLE_PREFIX}roadmap WHERE id = ?`;
   await db.getAllAsync(query, [id]);
 }
+
+
+/**
+ * Add or update interest record.
+ * Inserts a new record if `pid` doesn't exist; otherwise, updates the existing record.
+ */
+export async function addToInterest(
+  db: SQLiteDatabase,
+  data: Interest
+): Promise<void> {
+  if (!data.pid) {
+    throw new Error('The `pid` field is required.');
+  }
+
+  const { uid, pid, progress = '0%', status = 1, sort = 0, note = '' } = data;
+
+  // Check if `pid` already exists
+  const checkQuery = `
+    SELECT COUNT(*) as count FROM ${TABLE_PREFIX}interest WHERE pid = ?
+  `;
+  const checkResult = await db.runAsync(checkQuery, [pid]);
+  const count = checkResult?.rows?.item(0)?.count;
+
+  if (count > 0) {
+    // Update the existing record
+    const updateQuery = `
+      UPDATE ${TABLE_PREFIX}interest
+      SET uid = ?, progress = ?, status = ?, sort = ?, note = ?
+      WHERE pid = ?
+    `;
+    await db.runAsync(updateQuery, [uid, progress, status, sort, note, pid]);
+  } else {
+    // Insert a new record
+    const id = `${Date.now()}_${uid}`;
+    const insertQuery = `
+      INSERT INTO ${TABLE_PREFIX}interest (id, uid, pid, progress, status, sort, note)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `;
+    await db.runAsync(insertQuery, [id, uid, pid, progress, status, sort, note]);
+  }
+}
+
+/**
+ * Delete interest records by `pid`.
+ * Deletes all records where `pid` matches.
+ */
+export async function deleteFromInterest(
+  db: SQLiteDatabase,
+  pid: number
+): Promise<void> {
+  if (!pid) {
+    throw new Error('The `pid` field is required.');
+  }
+
+  const deleteQuery = `
+    DELETE FROM ${TABLE_PREFIX}interest WHERE pid = ?
+  `;
+  await db.runAsync(deleteQuery, [pid]);
+}
+
+
+// Function 3: Get All Interests
+export async function getAllInterest(db: SQLiteDatabase): Promise<any[]> {
+  const query = `
+    SELECT p.*
+    FROM ${TABLE_PREFIX}interest i
+    JOIN ${TABLE_PREFIX}posts p ON i.pid = p.ID
+  `;
+
+  const result = await db.getAllAsync(query);
+
+  return result;
+}
+
+
+
+

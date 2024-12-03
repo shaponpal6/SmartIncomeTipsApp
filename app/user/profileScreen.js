@@ -14,6 +14,15 @@ const ProfileScreen = () => {
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <CollapsingToolbar
+            leftItem={
+                <MaterialIcons
+                    name="arrow-back-ios"
+                    size={24}
+                    color={Colors.primaryColor}
+                    onPress={() => navigation.pop()}
+                />
+            }
+            
                 element={
                     <Text style={{ ...Fonts.black25Bold }}>Settings</Text>
                 }

@@ -16,6 +16,8 @@ import Carousel from 'react-native-snap-carousel-v4';
 import CollapsingToolbar from "../../../component/sliverAppBar";
 import Roadmap from "../../../component/Roadmap";
 import TagsComponent from "../../../component/TagsComponent";
+import BotResponse from "../../../component/BotResponse";
+import WoalaBot from "../../../component/WoalaBot";
 import Logo from "../../../component/Logo";
 import TopMenu from "../../../component/TopMenu";
 import Button from "../../../component/Button";
@@ -109,7 +111,7 @@ const HomeScreen = () => {
         return <Loading/>
     }
     return (
-        <View style={{ flex: 1, }}>
+        <View style={{ flex: 1, position: 'relative'}}>
             <ImageBackgroundRoot source={categoryImage} style={{flex: 1}} imageStyle={{}}>
             <CollapsingToolbar
                 leftItem={
@@ -142,6 +144,10 @@ const HomeScreen = () => {
                 {/* <DatabaseTest/> */}
                     
                     {autoScroller()}
+                    <Text>start</Text>
+                    <BotResponse/>
+                    <Text>end</Text>
+                   
                     
                     {/* <Roadmap/> */}
                     {/* <TagsComponent tags={data.categories} maxItemsToDisplay={20} /> */}
@@ -149,21 +155,23 @@ const HomeScreen = () => {
                     {categoriesList()} */}
                     {/* {title({ title: 'Top Income Sectors' })} */}
                     <CategoryGrid title="Top Income Sectors" data={data.categories}/>
-                    <PostGrid title="Top Posts" data={data.posts} route="postDetail/postDetailScreen"/>
-                    <PostGrid title="Popular Courses" data={data.posts} route="courseDetail/courseDetailScreen"/>
+                    <PostGrid title="Top Posts" data={data.posts} route="postDetail/postDetailScreen" scroll="horizontal"/>
+                    <PostGrid title="Popular Courses" data={data.posts} route="courseDetail/courseDetailScreen" scroll="horizontal"/>
                     {/* <TagGrid title="Top Income Sectors" data={data.categories}/> */}
                     {/* {title({ title: 'Top Income Sectors' })} */}
                     {/* {categories()} */}
-                    {title({ title: 'Popular Tips' })}
-                    {popularPosts()}
-                    {title({ title: 'Popular Courses' })}
+                    {/* {title({ title: 'Popular Tips' })} */}
+                    {/* {popularPosts()} */}
+                    {/* {title({ title: 'Popular Courses' })}
                     {popularCourses()}
                     {title({ title: 'New Courses' })}
-                    {newCourses()}
+                    {newCourses()} */}
                     {/* {title({ title: 'Instructor' })}
                     {instructors()} */}
+                    
                 </View>
             </CollapsingToolbar>
+            <WoalaBot/>
             </ImageBackgroundRoot>
         </View>
     )

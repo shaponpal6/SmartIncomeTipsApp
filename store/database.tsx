@@ -64,6 +64,16 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
           answer TEXT
       );
 
+      CREATE TABLE IF NOT EXISTS ${TABLE_PREFIX}interest (
+          id TEXT PRIMARY KEY NOT NULL,
+          uid INTEGER NOT NULL,
+          pid INTEGER NOT NULL,
+          progress TEXT DEFAULT '0%',
+          status INTEGER DEFAULT 1,
+          sort INTEGER DEFAULT 0,
+          note TEXT
+      );
+
       CREATE TABLE IF NOT EXISTS ${TABLE_PREFIX}categories (
         term_id INTEGER PRIMARY KEY,
         name TEXT,

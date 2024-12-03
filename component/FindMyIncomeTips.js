@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Alert, TouchableOpacity, Animated } from 'react-native';
+import { View, Text, StyleSheet, Alert, TouchableOpacity, Animated, ScrollView } from 'react-native';
 import CustomButton from './Button';
 import CustomSelect from './CustomSelect';
 import { Ionicons } from '@expo/vector-icons';
@@ -97,127 +97,142 @@ const FindMyIncomeTips = ({onChange=null}) => {
     }, []);
 
     return (
-        <View style={styles.container}>
-            <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
-                {!selectedProfession && (
-                    <>
-                    <Text style={styles.label}>My Profession is:</Text>
-                    <View style={styles.optionsContainer}>
-                        {professionOptions.map((option) => (
-                            <TouchableOpacity
-                                key={option.term_id}
-                                style={styles.option}
-                                onPress={() => {
-                                    setSelectedProfession(option);
-                                    setStep(2);
-                                    setShowInterest(true);
-                                }}
-                            >
-                                <Text style={styles.optionText}>{option.name}</Text>
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-                    </>
-                )}
-                {selectedProfession && (
-                    <CustomSelect
-                        title="My Profession is:"
-                        selectedValue={selectedProfession.name}
-                        onValueChange={(itemValue) => setSelectedProfession(itemValue)}
-                        options={professionOptions}
+            <View style={[styles.container]}>
+        <ScrollView style={[styles.containerWrapper]} showsVerticalScrollIndicator={true}>
+                <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
+                    {!selectedProfession && (
+                        <>
+                        <Text style={styles.label}>My Profession is:</Text>
+                        <View style={styles.optionsContainer}>
+                            {professionOptions.map((option) => (
+                                <TouchableOpacity
+                                    key={option.term_id}
+                                    style={styles.option}
+                                    onPress={() => {
+                                        setSelectedProfession(option);
+                                        setStep(2);
+                                        setShowInterest(true);
+                                    }}
+                                >
+                                    <Text style={styles.optionText}>{option.name}</Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                        </>
+                    )}
+                    {selectedProfession && (
+                        <CustomSelect
+                            title="My Profession is:"
+                            selectedValue={selectedProfession.name}
+                            onValueChange={(itemValue) => setSelectedProfession(itemValue)}
+                            options={professionOptions}
+                        />
+                    )}
+                    
+
+                    {showInterest && (
+                        <>
+                            {!selectedInterest && (
+                                <>
+                            <Text style={styles.label}>and my interest in:</Text>
+                                <View style={styles.optionsContainer}>
+                                    {interestOptions && interestOptions.length && interestOptions.map((option) => (
+                                        <TouchableOpacity
+                                            key={option.term_id}
+                                            style={styles.option}
+                                            onPress={() => {
+                                                setSelectedInterest(option);
+                                                setStep(3);
+                                                setShowSkills(true);
+                                            }}
+                                        >
+                                            <Text style={styles.optionText}>{option.name}</Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </View>
+                                </>
+                            )}
+                            {selectedInterest && (
+                                <CustomSelect
+                                    title="and my interest in:"
+                                    selectedValue={selectedInterest.name}
+                                    onValueChange={(itemValue) => setSelectedInterest(itemValue)}
+                                    options={interestOptions}
+                                />
+                            )}
+                        </>
+                    )}
+
+                    {showSkills && (
+                        <>
+                            {!selectedSkills && (
+                                <>
+                            <Text style={styles.label}>and my skills in:</Text>
+                                <View style={styles.optionsContainer}>
+                                    {skillsOptions.map((option) => (
+                                        <TouchableOpacity
+                                            key={option.term_id}
+                                            style={styles.option}
+                                            onPress={() => setSelectedSkills(option)}
+                                        >
+                                            <Text style={styles.optionText}>{option.name}</Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </View>
+                                </>
+                            )}
+                            {selectedSkills && (
+                                <CustomSelect
+                                    title="and my skills in:"
+                                    selectedValue={selectedSkills.name}
+                                    onValueChange={(itemValue) => setSelectedSkills(itemValue)}
+                                    options={skillsOptions}
+                                />
+                            )}
+                        </>
+                    )}
+                </Animated.View>
+
+                <View style={styles.buttonContainer}>
+                    <CustomButton
+                        title="Find My Income Tips"
+                        onPress={handleButtonPress}
+                        backgroundColor="#007BFF"
+                        textColor="#FFFFFF"
+                        borderRadius={20}
+                        paddingHorizontal={20}
+                        paddingVertical={12}
+                        style={styles.inlineButton}
                     />
-                )}
-                
-
-                {showInterest && (
-                    <>
-                        {!selectedInterest && (
-                            <>
-                        <Text style={styles.label}>and my interest in:</Text>
-                            <View style={styles.optionsContainer}>
-                                {interestOptions && interestOptions.length && interestOptions.map((option) => (
-                                    <TouchableOpacity
-                                        key={option.term_id}
-                                        style={styles.option}
-                                        onPress={() => {
-                                            setSelectedInterest(option);
-                                            setStep(3);
-                                            setShowSkills(true);
-                                        }}
-                                    >
-                                        <Text style={styles.optionText}>{option.name}</Text>
-                                    </TouchableOpacity>
-                                ))}
-                            </View>
-                            </>
-                        )}
-                        {selectedInterest && (
-                            <CustomSelect
-                                title="and my interest in:"
-                                selectedValue={selectedInterest.name}
-                                onValueChange={(itemValue) => setSelectedInterest(itemValue)}
-                                options={interestOptions}
-                            />
-                        )}
-                    </>
-                )}
-
-                {showSkills && (
-                    <>
-                        {!selectedSkills && (
-                            <>
-                        <Text style={styles.label}>and my skills in:</Text>
-                            <View style={styles.optionsContainer}>
-                                {skillsOptions.map((option) => (
-                                    <TouchableOpacity
-                                        key={option.term_id}
-                                        style={styles.option}
-                                        onPress={() => setSelectedSkills(option)}
-                                    >
-                                        <Text style={styles.optionText}>{option.name}</Text>
-                                    </TouchableOpacity>
-                                ))}
-                            </View>
-                            </>
-                        )}
-                        {selectedSkills && (
-                            <CustomSelect
-                                title="and my skills in:"
-                                selectedValue={selectedSkills.name}
-                                onValueChange={(itemValue) => setSelectedSkills(itemValue)}
-                                options={skillsOptions}
-                            />
-                        )}
-                    </>
-                )}
-            </Animated.View>
-
-            <View style={styles.buttonContainer}>
-                <CustomButton
-                    title="Find My Income Tips"
-                    onPress={handleButtonPress}
-                    backgroundColor="#007BFF"
-                    textColor="#FFFFFF"
-                    borderRadius={20}
-                    paddingHorizontal={20}
-                    paddingVertical={12}
-                    style={styles.inlineButton}
-                />
-                <TouchableOpacity onPress={handleReset} style={styles.resetButton}>
-                    <Ionicons name="refresh" size={24} color="#FFFFFF" />
-                </TouchableOpacity>
+                    <TouchableOpacity onPress={handleReset} style={styles.resetButton}>
+                        <Ionicons name="refresh" size={24} color="#FFFFFF" />
+                    </TouchableOpacity>
+                </View>
+        </ScrollView>
             </View>
-        </View>
     );
 };
 
 const styles = StyleSheet.create({
+    containerWrapper: {
+        width: '100%',
+    maxHeight: 400, // Restrict height to 400px
+    // borderWidth: 1,
+    // borderColor: '#ddd',
+    // borderRadius: 10,
+    // backgroundColor: '#FFF',
+    },
     container: {
         flex: 1,
-        justifyContent: 'space-between',
+        width: '100%',
+        justifyContent: 'center',
         alignItems: 'center',
-        paddingVertical: 30,
-        paddingHorizontal: 15,
+        // paddingVertical: 30,
+        // paddingHorizontal: 15,
+        position: 'absolute',
+        bottom: 0,
+        // height: 400
+
     },
     content: {
         alignItems: 'center',
@@ -236,7 +251,7 @@ const styles = StyleSheet.create({
     },
     option: {
         backgroundColor: '#e0e0e0',
-        padding: 10,
+        padding: 6,
         borderRadius: 8,
         margin: 5,
     },
@@ -247,7 +262,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'center',
         width: '100%',
-        marginBottom: 20,
+        // marginBottom: 20,
     },
     inlineButton: {
         marginRight: 10,
